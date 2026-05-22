@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const baseDir = path.join(__dirname, 'src', 'app');
-const routes = ['history', 'grouplancing', 'takanesh', 'liquidity', 'risks', 'team', 'import', 'apisettings'];
+const routes = ['history', 'grouplancing', 'tekanesh', 'liquidity', 'risks', 'team', 'import', 'apisettings'];
 
 routes.forEach(route => {
   const routePath = path.join(baseDir, route);

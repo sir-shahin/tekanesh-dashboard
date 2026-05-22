@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "@/providers";
-import DashboardLayoutComponent from "./DashboardLayout";
+// import DashboardLayoutComponent from "./(dashboard)/DashboardLayout";
 
 export const metadata: Metadata = {
   title: "پنل هلدینگ بشری",
@@ -16,9 +16,9 @@ export default function RootLayout({
     <html lang="fa" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <Providers>
-          <DashboardLayoutComponent>
+          {/* <DashboardLayoutComponent> */}
             {children}
-          </DashboardLayoutComponent>
+          {/* </DashboardLayoutComponent> */}
         </Providers>
       </body>
     </html>

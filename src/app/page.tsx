@@ -1,69 +1,46 @@
-export default function OverviewPage() {
-  return (
-    <div className="page active">
-      <div className="ph">
-        <div>
-          <div className="ph-title">داشبورد اجرایی</div>
-          <div className="ph-sub">خرداد ۱۴۰۳ — آخرین بروزرسانی: امروز</div>
-        </div>
-        <div className="ph-actions">
-          <button className="btn btn-ghost btn-sm">+ ورود داده</button>
-        </div>
-      </div>
+'use client'
+import { Box, Button, Paper, TextField, Typography } from "@mui/material"
+import Image from "next/image";
+import Logo from '@/assets/logo.jpg'
+import { useRouter } from "next/navigation";
 
-      <div className="kg4">
-        <div className="kc g">
-          <div className="kc-icon">💵</div>
-          <div className="kc-label">درآمد دلاری ماهانه</div>
-          <div className="kc-val g">$40,000</div>
-          <div className="kc-sub"><span className="tag dn">↓ ۷۳٪ از اوج</span> اوج: $150K</div>
-        </div>
-        <div className="kc y">
-          <div className="kc-icon">📈</div>
-          <div className="kc-label">سود ناخالص</div>
-          <div className="kc-val y">$6,000</div>
-          <div className="kc-sub"><span className="tag nt">۱۵٪ margin</span></div>
-        </div>
-        <div className="kc b">
-          <div className="kc-icon">🎓</div>
-          <div className="kc-label">فروش تکانش</div>
-          <div className="kc-val r">۵۰ م</div>
-          <div className="kc-sub"><span className="tag dn">↓ ۹۷٪ از اوج</span> اوج: ۱,۵۰۰م</div>
-        </div>
-        <div className="kc r">
-          <div className="kc-icon">⏳</div>
-          <div className="kc-label">Runway</div>
-          <div className="kc-val r">۶ ماه</div>
-          <div className="kc-sub"><span className="tag dn">بحرانی</span> هزینه: ۱,۵۰۰م/ماه</div>
-        </div>
-      </div>
+export default function Login(){
+    const router = useRouter()
+    const handleSubmit = () =>{
+        router.replace('/dashboard')
+    }
 
-      <div className="kg4">
-        <div className="kc p">
-          <div className="kc-icon">👷</div>
-          <div className="kc-label">مشارکت‌کنندگان پروژه</div>
-          <div className="kc-val p">۱۲ نفر</div>
-          <div className="kc-sub">این ماه فعال</div>
-        </div>
-        <div className="kc b">
-          <div className="kc-icon">📚</div>
-          <div className="kc-label">دوره‌های فروخته (تجمیعی)</div>
-          <div className="kc-val b">۳۵۰</div>
-          <div className="kc-sub"><span className="tag up">+۲۸ این ماه</span></div>
-        </div>
-        <div className="kc c">
-          <div className="kc-icon">💎</div>
-          <div className="kc-label">نسبت هزینه به درآمد</div>
-          <div className="kc-val r">۸۶٪</div>
-          <div className="kc-sub"><span className="tag dn">بحرانی</span> هدف: زیر ۶۰٪</div>
-        </div>
-        <div className="kc g">
-          <div className="kc-icon">🏦</div>
-          <div className="kc-label">کل نقدینگی (ریالی)</div>
-          <div className="kc-val g">۹,۰۰۰ م</div>
-          <div className="kc-sub"><span className="tag nt">۶ ماه runway</span></div>
-        </div>
-      </div>
-    </div>
-  );
+    return <>
+        <Box flex={1} minHeight={'100vh'} display='flex' justifyContent="center" alignItems={'center'}>
+            <Box>
+                <Box textAlign={'center'}>
+                    <Image src={Logo.src} width={100} height={100} alt="بشری" style={{marginBottom:40, boxShadow: '0 5px 30px 10px #2873ac96'}}/>
+                    <Typography variant="h4">پنل هلدینگ بشری</Typography>
+                </Box>
+            
+                <Paper sx={{p:5, my:5, borderRadius:3}}>
+                    <label>ایمیل</label>
+                    <TextField
+                        fullWidth 
+                        size="small"
+                        type="email"
+                        margin="dense"
+                        sx={{ mb:3}}
+                        
+                    />
+
+                    <label>پسورد</label>
+                    <TextField
+                        fullWidth 
+                        size="small"
+                        type="password"
+                        margin="dense"
+                    />
+
+                    <Button variant="contained" fullWidth sx={{mt:5}} onClick={handleSubmit}>ورود</Button>
+                </Paper>
+            </Box>
+            
+        </Box>
+    </>
 }

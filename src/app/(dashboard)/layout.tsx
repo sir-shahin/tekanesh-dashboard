@@ -2,15 +2,17 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
+import Logo from "@/assets/logo.jpg"
 
 const menuItems = [
   { section: 'نمای کلی', items: [
-    { href: '/', icon: '📊', label: 'داشبورد' },
+    { href: '/dashboard', icon: '📊', label: 'داشبورد' },
     { href: '/history', icon: '📅', label: 'تاریخچه ماه‌ها' }
   ]},
   { section: 'کسب‌وکارها', items: [
     { href: '/grouplancing', icon: '💼', label: 'گروپلنسینگ' },
-    { href: '/takanesh', icon: '🎓', label: 'تکانش' }
+    { href: '/tekanesh', icon: '🎓', label: 'تکانش' }
   ]},
   { section: 'مالی و تیم', items: [
     { href: '/liquidity', icon: '💰', label: 'نقدینگی' },
@@ -35,7 +37,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="app">
       <header>
         <div className="logo">
-          <div className="logo-mark">ب</div>
+          <div className="logo-mark">
+            <Image src={Logo.src} width={35} height={35} alt="boshra" style={{borderRadius:8}}/>
+          </div>
           <div className="logo-info">
             <div className="name">هلدینگ بشری</div>
             <div className="sub">Executive Dashboard</div>
