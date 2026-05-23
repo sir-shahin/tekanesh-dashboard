@@ -17,7 +17,7 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <Providers>
           {/* <DashboardLayoutComponent> */}
-            {children}
+          {children}
           {/* </DashboardLayoutComponent> */}
         </Providers>
       </body>

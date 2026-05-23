@@ -1,5 +1,5 @@
 import Card from "@/components/card";
-import { Box, Stack } from "@mui/material"
+import { Box, Stack } from "@mui/material";
 
 export default function Page() {
   return (
@@ -10,7 +10,7 @@ export default function Page() {
           <div className="ph-sub">بستر آموزش</div>
         </div>
       </div>
-      <Stack direction={'row'} gap={2} mb={3}>
+      <Stack direction={"row"} gap={2} mb={3}>
         <Box className="kg" flex={1}>
           <div className="kc g">
             <div className="kc-label">فروش ماهانه (فعلی)</div>
@@ -22,7 +22,7 @@ export default function Page() {
           <div className="kc g">
             <div className="kc-label">اوج فروش</div>
             <div className="kc-val g">5م</div>
-            <div className="kc-sub">شرایط عادی</div>
+            <div className="kc-sub">شرایط عادی (دی)</div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
@@ -41,8 +41,7 @@ export default function Page() {
         </Box>
       </Stack>
 
-      <Stack direction={'row'} gap="2" mb={3}>
-
+      <Stack direction={"row"} gap="2" mb={3}>
         <Box className="kg" flex={1}>
           <div className="kc g">
             <div className="kc-label"> نرخ ریزش دانشجو</div>
@@ -73,12 +72,12 @@ export default function Page() {
         </Box>
       </Stack>
 
-      <Stack direction={'row'} gap={2} mb={3}>
+      <Stack direction={"row"} gap={2} mb={3}>
         <Box className="kg" flex={1}>
           <div className="kc g">
             <div className="kc-label"> دوره‌های فروخته (تجمیعی)</div>
             <div className="kc-val g">۷</div>
-            <div className="kc-sub">کل تاریخ  </div>
+            <div className="kc-sub">کل تاریخ </div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
@@ -97,18 +96,17 @@ export default function Page() {
         </Box>
         <Box className="kg" flex={1}>
           <div className="kc g">
-            <div className="kc-label">  درآمد به ازای هر مدرس</div>
+            <div className="kc-label"> درآمد به ازای هر مدرس</div>
             <div className="kc-val g">180 م</div>
             <div className="kc-sub"> میانگین ماهانه</div>
           </div>
         </Box>
       </Stack>
 
-      <Stack direction={'row'} gap={2}>
-        <Card title="دوره‌ها — عملکرد جزئی"/>
-        <Card title="مدرس‌ها و منتورها"/>
+      <Stack direction={"row"} gap={2}>
+        <Card title="دوره‌ها — عملکرد جزئی" />
+        <Card title="مدرس‌ها و منتورها" />
       </Stack>
-     
     </div>
   );
 }

@@ -1,10 +1,10 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const baseDir = path.join(__dirname, 'src', 'app');
-const routes = ['history', 'grouplancing', 'tekanesh', 'liquidity', 'risks', 'team', 'import', 'apisettings'];
+const baseDir = path.join(__dirname, "src", "app");
+const routes = ["history", "grouplancing", "tekanesh", "liquidity", "risks", "team", "import", "apisettings"];
 
-routes.forEach(route => {
+routes.forEach((route) => {
   const routePath = path.join(baseDir, route);
   if (!fs.existsSync(routePath)) {
     fs.mkdirSync(routePath, { recursive: true });
@@ -12,4 +12,4 @@ routes.forEach(route => {
   }
 });
 
-console.log('All route directories created');
+console.log("All route directories created");
