@@ -265,7 +265,7 @@ export default function Page() {
               </thead>
               <tbody>
                 {teachers?.map(
-                  (Teacher: { id: number; title: string; courses: { title: string }[]; total_income: string }) => (
+                  (Teacher: { id: number; name: string; courses: { title: string }[]; total_income: string }) => (
                     <tr style={{ fontSize: 12 }} key={Teacher.id}>
                       <td style={{ color: "var(--t1)" }}>{Teacher.name}</td>
                       <td style={{ color: "var(--green)" }}>
