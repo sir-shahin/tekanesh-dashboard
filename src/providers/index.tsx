@@ -8,6 +8,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 
 import theme from "@/app/theme";
 import { APIProvider } from "./api-provider";
+import { AuthProvider } from "./auth-provider";
 
 export function Providers(props: { children: React.ReactNode }) {
   return (
@@ -21,10 +22,10 @@ export function Providers(props: { children: React.ReactNode }) {
         />
 
         <APIProvider>
-         {/* <AuthProvider> */}
-        {/* The rest of the application */}
-        {props.children}
-        {/* </AuthProvider> */}
+          <AuthProvider>
+            {/* The rest of the application */}
+            {props.children}
+          </AuthProvider>
         </APIProvider>
       </ThemeProvider>
     </AppRouterCacheProvider>

@@ -1,5 +1,9 @@
+"use client";
 import Card from "@/components/card";
-import { Box, Stack } from "@mui/material";
+import { axiosInstance } from "@/utils/axios";
+import { Box, CircularProgress, Stack } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 const dashboardData = {
   gross_income: 40000,
@@ -11,25 +15,23 @@ const dashboardData = {
   platform_dependency_percent: 38,
   monthly_loss: 9500,
 };
-const pricesDataTable = [
-  {
-    platform: "Upwork",
-    amount: 8500,
-    percent: 42,
-  },
-  {
-    platform: "Freelancer",
-    amount: 5200,
-    percent: 26,
-  },
-  {
-    platform: "Fiverr",
-    amount: 5800,
-    percent: 32,
-  },
-];
 
 export default function Page() {
+  const [loading, setLoading] = useState(true);
+
+  const fetchPlat = async () => {
+    const { data } = await axiosInstance.get(`/platform-earned-stats/?start_date=2024-01-01&end_date=2026-08-23`);
+    setLoading(false);
+    return data;
+  };
+
+  // Use the tanstack composable
+  const { data: pricesDataTable } = useQuery({
+    queryKey: ["get-platforms"], // unique cache key
+    queryFn: fetchPlat, // the async function
+    staleTime: 60000,
+  });
+
   return (
     <div className="page active">
       <div className="ph">
@@ -134,11 +136,19 @@ export default function Page() {
 
         <Card title="توزیع درآمد بین پلتفرم ها">
           <div className="cb">
-            {pricesDataTable.map((data) => (
-              <div className="cmp">
-                <div className="cmp-label">{data.platform}</div>
+            {loading && (
+              <Box textAlign={"center"}>
+                <CircularProgress color="primary" />
+              </Box>
+            )}
+            {pricesDataTable?.platforms.map((data: any) => (
+              <div className="cmp" key={data.platform_uuid}>
+                <div className="cmp-label">{data.platform_name}</div>
                 <div className="cmp-bar-wrap">
-                  <div className="cmp-bar-fill" style={{ width: `${data.percent}%`, background: "var(--green)" }}></div>
+                  <div
+                    className="cmp-bar-fill"
+                    style={{ width: `${data.percentage}%`, background: "var(--green)" }}
+                  ></div>
                 </div>
                 <div className="cmp-val">${data.amount}</div>
               </div>
