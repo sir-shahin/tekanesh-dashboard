@@ -1,5 +1,5 @@
 import Card from "@/components/card";
-import { Box, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import Link from "next/link";
 
 export default function OverviewPage() {

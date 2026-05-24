@@ -20,7 +20,7 @@ export default function Login() {
   };
 
   const otpRequestMutation = useMutation({
-    mutationFn: (variables: any) => axiosInstance.post(`https://etekanesh.com/account/api/otp/send/`, variables),
+    mutationFn: (variables:{ identity: string; }) => axiosInstance.post(`https://etekanesh.com/account/api/otp/send/`, variables),
     onError: (error) => alert(error),
     onSettled: () => setLoading(false),
     onSuccess: () => setStep(1),
@@ -47,7 +47,7 @@ export default function Login() {
   };
 
   const loginMutation = useMutation({
-    mutationFn: (variables: any) => axiosInstance.post(`https://etekanesh.com/account/api/otp/verify/`, variables),
+    mutationFn: (variables: { identity: string; otp: string; }) => axiosInstance.post(`https://etekanesh.com/account/api/otp/verify/`, variables),
     onError: (error) => alert(error),
     onSettled: () => setLoading(false),
     onSuccess: () => {

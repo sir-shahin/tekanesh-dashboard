@@ -5,9 +5,11 @@ import { Box, Button, Stack, TextField } from "@mui/material";
 
 export default function Page() {
 
-  function handleFile(ev:any){
-    const f=ev.target.files[0];if(!f)return;
-    // const r=new FileReader();r.onload=e=>parseCSV(e.target.result,f.name);r.readAsText(f,'UTF-8');
+  function handleFile(ev: React.ChangeEvent<HTMLInputElement>){
+    if(ev.target.files){
+      const f=ev.target.files[0];if(!f)return;
+      // const r=new FileReader();r.onload=e=>parseCSV(e.target.result,f.name);r.readAsText(f,'UTF-8');
+    }
   }
 
   function dlCSV(){
@@ -37,7 +39,7 @@ export default function Page() {
             </div>
               <div className="upload" id="upzone">
                 <div style={{fontSize:'10px',color:'var(--t3)'}}> کلیک کن برای انتخاب</div>
-                <input type="file" accept=".csv" onChange={() =>handleFile(event)} />
+                <input type="file" accept=".csv" onChange={() =>handleFile} />
               </div>
               <div id="csv-prev"></div>
             </div>
