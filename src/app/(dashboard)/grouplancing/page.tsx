@@ -141,12 +141,7 @@ export default function Page() {
                 <CircularProgress color="primary" />
               </Box>
             )}
-            {pricesDataTable?.platforms.map((data:{
-              platform_uuid:string;
-              platform_name: string;
-              percentage: string;
-              amount: string
-            }) => (
+            {pricesDataTable?.platforms.map((data: any) => (
               <div className="cmp" key={data.platform_uuid}>
                 <div className="cmp-label">{data.platform_name}</div>
                 <div className="cmp-bar-wrap">
