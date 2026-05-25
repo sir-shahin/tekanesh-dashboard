@@ -25,12 +25,24 @@ export default function Page() {
     return data;
   };
 
-  // Use the tanstack composable
+  //
   const { data: pricesDataTable } = useQuery({
     queryKey: ["get-platforms"], // unique cache key
     queryFn: fetchPlat, // the async function
     staleTime: 60000,
   });
+
+  // const fetchIncome = async () => {
+  //   const { data } = await axiosInstance.get(`/dashboard/income-stats/?start_date=1400-01-01&end_date=1406-08-23`);
+  //   return data;
+  // };
+
+  // //
+  // const { data: dashboardData } = useQuery({
+  //   queryKey: ["get-income-states"],
+  //   queryFn: fetchIncome,
+  //   staleTime: 60000,
+  // });
 
   return (
     <div className="page active">

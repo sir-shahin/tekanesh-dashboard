@@ -1,6 +1,9 @@
+"use client";
 import { Stack } from "@mui/material";
 
 export default function Page() {
+  const loadTeamExcel = async (event: any) => {};
+
   return (
     <div className="page active">
       <div className="ph">
@@ -11,7 +14,12 @@ export default function Page() {
         <div className="ph-actions">
           <label className="btn btn-g btn-sm" style={{ cursor: "pointer" }}>
             📂 آپلود اکسل تیم
-            <input type="file" accept=".xlsx,.csv" style={{ display: "none" }} />
+            <input
+              type="file"
+              accept=".xlsx,.csv"
+              style={{ display: "none" }}
+              onChange={(event) => loadTeamExcel(event)}
+            />
           </label>
         </div>
       </div>
