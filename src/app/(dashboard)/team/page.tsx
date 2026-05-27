@@ -2,7 +2,7 @@
 import { Stack } from "@mui/material";
 
 export default function Page() {
-  const loadTeamExcel = async (event: any) => {};
+  const loadTeamExcel = async () => {};
 
   return (
     <div className="page active">
@@ -18,7 +18,7 @@ export default function Page() {
               type="file"
               accept=".xlsx,.csv"
               style={{ display: "none" }}
-              onChange={(event) => loadTeamExcel(event)}
+              onChange={() => loadTeamExcel()}
             />
           </label>
         </div>
