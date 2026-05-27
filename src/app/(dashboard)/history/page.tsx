@@ -6,11 +6,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 export default function Page() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const { data: userEarned } = useQuery({
     queryKey: ["get-user-earned"],
     queryFn: async () => {
+      setLoading(true);
       const { data } = await axiosInstance.get(`https://api.grouplancing.com/crm/api/user-earned-stats/`);
       setLoading(false);
       return data;

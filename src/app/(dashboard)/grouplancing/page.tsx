@@ -5,22 +5,14 @@ import { Box, CircularProgress, Stack } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
-const dashboardData = {
-  gross_income: 40000,
-  gross_income_target: 150000,
-  gross_grouplancing_income: 6000,
-  active_projects: 8,
-  new_income_starters: 3,
-  average_income_per_person: 5000,
-  platform_dependency_percent: 38,
-  monthly_loss: 9500,
-};
-
 export default function Page() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const fetchPlat = async () => {
-    const { data } = await axiosInstance.get(`/platform-earned-stats/?start_date=2024-01-01&end_date=2026-08-23`);
+    setLoading(true);
+    const { data } = await axiosInstance.get(
+      `https://api.grouplancing.com/crm/api/platform-earned-stats/?start_date=2024-01-01&end_date=2026-08-23`,
+    );
     setLoading(false);
     return data;
   };
@@ -32,17 +24,19 @@ export default function Page() {
     staleTime: 60000,
   });
 
-  // const fetchIncome = async () => {
-  //   const { data } = await axiosInstance.get(`/dashboard/income-stats/?start_date=1400-01-01&end_date=1406-08-23`);
-  //   return data;
-  // };
+  const fetchIncome = async () => {
+    const { data } = await axiosInstance.get(
+      `https://api.grouplancing.com/dashboard/api/dashboard/income-stats/?start_date=1400-01-01&end_date=1406-08-23`,
+    );
+    return data;
+  };
 
-  // //
-  // const { data: dashboardData } = useQuery({
-  //   queryKey: ["get-income-states"],
-  //   queryFn: fetchIncome,
-  //   staleTime: 60000,
-  // });
+  //
+  const { data: dashboardData } = useQuery({
+    queryKey: ["get-income-states"],
+    queryFn: fetchIncome,
+    staleTime: 60000,
+  });
 
   return (
     <div className="page active">
@@ -56,21 +50,21 @@ export default function Page() {
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc g">
             <div className="kc-label">درآمد ناخالص فعلی</div>
-            <div className="kc-val g">${dashboardData.gross_income}$</div>
+            <div className="kc-val g">${dashboardData?.gross_income}$</div>
             <div className="kc-sub">73% از اوج</div>
           </div>
         </div>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc g">
             <div className="kc-label">خالص گروپلنسینگ</div>
-            <div className="kc-val g">${dashboardData.gross_grouplancing_income}$</div>
+            <div className="kc-val g">${dashboardData?.gross_grouplancing_income}$</div>
             <div className="kc-sub">۱۵٪ margin</div>
           </div>
         </div>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc g">
             <div className="kc-label">پروژه‌های فعال</div>
-            <div className="kc-val g">{dashboardData.active_projects}</div>
+            <div className="kc-val g">{dashboardData?.active_projects}</div>
             <div className="kc-sub">+۲ ماه قبل</div>
           </div>
         </div>
@@ -86,21 +80,21 @@ export default function Page() {
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc g">
             <div className="kc-label">تعداد درآمد اولی ها</div>
-            <div className="kc-val g">{dashboardData.new_income_starters}</div>
+            <div className="kc-val g">{dashboardData?.new_income_starters}</div>
             <div className="kc-sub">این ماه</div>
           </div>
         </div>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc g">
             <div className="kc-label">پروژه‌های از دست رفته</div>
-            <div className="kc-val g">{dashboardData.monthly_loss}</div>
+            <div className="kc-val g">{dashboardData?.monthly_loss}</div>
             <div className="kc-sub">این ماه</div>
           </div>
         </div>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc g">
             <div className="kc-label">میانگین درآمد هر نفر</div>
-            <div className="kc-val g">{dashboardData.average_income_per_person}$</div>
+            <div className="kc-val g">{dashboardData?.average_income_per_person}$</div>
             <div className="kc-sub">+۲ ماه قبل</div>
           </div>
         </div>
@@ -123,7 +117,7 @@ export default function Page() {
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc g">
             <div className="kc-label">بیشترین وابستگی به پلتفرم</div>
-            <div className="kc-val g">{dashboardData.platform_dependency_percent}%</div>
+            <div className="kc-val g">{dashboardData?.platform_dependency_percent}%</div>
             <div className="kc-sub"> ریسک تمرکز بالا</div>
           </div>
         </div>
@@ -137,7 +131,7 @@ export default function Page() {
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc g">
             <div className="kc-label">هدف ماه بعد</div>
-            <div className="kc-val g">{dashboardData.gross_income_target}$</div>
+            <div className="kc-val g">{dashboardData?.gross_income_target}$</div>
             <div className="kc-sub"> رشد هدف</div>
           </div>
         </div>
@@ -169,7 +163,7 @@ export default function Page() {
         </Card>
       </Stack>
       <Box>
-        <Card title={`پیشرفت به هدف $${dashboardData.gross_income_target}`}></Card>
+        <Card title={`پیشرفت به هدف`}></Card>
       </Box>
     </div>
   );
