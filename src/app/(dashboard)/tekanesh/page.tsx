@@ -1,19 +1,23 @@
 "use client";
 import Card from "@/components/card";
 import { axiosInstance } from "@/utils/axios";
-import { Box, Stack } from "@mui/material";
+import { Box, Button, Stack, TextField } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 export default function Page() {
-  //
-  const { data: totalSales } = useQuery({
-    queryKey: ["get-totalsale"],
-    queryFn: async () => {
-      const { data } = await axiosInstance.get(`/reports/?action=total_sales`);
-      return data.data;
-    },
-    staleTime: 60000,
-  });
+  const [start, setStart] = useState<null | string>("");
+  const [end, setEnd] = useState<null | string>("");
+
+  const handleResetDate = () => {
+    setStart("");
+    setEnd("");
+    getTopCourseRefetch();
+  };
+  const handleFilter = () => {
+    getTopCourseRefetch();
+  };
+
   //
   const { data: bestSaleOfMonth } = useQuery({
     queryKey: ["get-bestsaleofmonth"],
@@ -51,11 +55,11 @@ export default function Page() {
     staleTime: 60000,
   });
   //
-  const { data: topCoursePeriod } = useQuery({
+  const { data: topCoursePeriod, refetch: getTopCourseRefetch } = useQuery({
     queryKey: ["get-top-course-period"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(
-        `/top-seller/?action=top_selling_course_by_teacher&start=1403/01/01&end=1403/06/30`,
+        `/top-seller/?action=top_selling_course_by_teacher&start=${start}&end=${end}`,
       );
       return data.data;
     },
@@ -115,33 +119,55 @@ export default function Page() {
           <div className="ph-sub">بستر آموزش</div>
         </div>
       </div>
+
+      <Stack direction={"row"} mb={3} gap={2}>
+        <TextField
+          value={start}
+          onChange={(e) => setStart(e.target.value)}
+          size="small"
+          label="از تاریخ"
+          placeholder="مثال 1405/02/02"
+        />
+        <TextField
+          value={end}
+          onChange={(e) => setEnd(e.target.value)}
+          size="small"
+          label="تا تاریخ"
+          placeholder="مثال 1405/02/02"
+        />
+        <Button onClick={handleFilter} variant="contained" sx={{ height: 40 }}>
+          اعمال فیلتر
+        </Button>
+
+        <Button onClick={handleResetDate}>حذف تاریخ</Button>
+      </Stack>
+
       <Stack direction={"row"} gap={2} mb={3}>
         <Box className="kg" flex={1}>
           <div className="kc g">
-            <div className="kc-label">فروش ماهانه (فعلی)</div>
-            <div className="kc-val g">{totalSales?.total}</div>
-            <div className="kc-sub"></div>
+            <div className="kc-label">فروش کل (کل تاریخ)</div>
+            <div className="kc-val g">{revenuePerTeacher?.total_revenue.toLocaleString("fa-IR")}</div>
+            <div className="kc-sub">پرداخت شده</div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
           <div className="kc g">
-            <div className="kc-label">اوج فروش</div>
-            <div className="kc-val g">{bestSaleOfMonth?.total_sale}</div>
-            <div className="kc-sub">شرایط عادی</div>
+            <div className="kc-label">اوج فروش (بهترین ماه سال گذشته)</div>
+            <div className="kc-val g">{bestSaleOfMonth?.total_sale.toLocaleString("fa-IR")}</div>
+            <div className="kc-sub">{bestSaleOfMonth?.month_name + " " + bestSaleOfMonth?.year}</div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
           <div className="kc g">
-            <div className="kc-label">دانشجوی فعال این ماه</div>
+            <div className="kc-label">دانشجوی فعال کل تاریخ</div>
             <div className="kc-val g">{activeStudents?.count}</div>
             {/* <div className="kc-sub"> ↓ از ۳۸۰ اوج</div> */}
           </div>
         </Box>
         <Box className="kg" flex={1}>
           <div className="kc g">
-            <div className="kc-label">دانشجوی جدید</div>
+            <div className="kc-label">دانشجوی جدید (کل تاریخ)</div>
             <div className="kc-val g">{newStudents?.count}</div>
-            <div className="kc-sub"> این ماه</div>
           </div>
         </Box>
       </Stack>
@@ -156,7 +182,7 @@ export default function Page() {
         </Box>
         <Box className="kg" flex={1}>
           <div className="kc g">
-            <div className="kc-label"> نرخ تکمیل دوره</div>
+            <div className="kc-label">دانشجو فارق التحصیل (کل)</div>
             <div className="kc-val g">{completedStudents?.count}</div>
             <div className="kc-sub"> هدف: -٪</div>
           </div>
@@ -180,30 +206,32 @@ export default function Page() {
       <Stack direction={"row"} gap={2} mb={3}>
         <Box className="kg" flex={1}>
           <div className="kc g">
-            <div className="kc-label"> دوره‌های فروخته (تجمیعی)</div>
+            <div className="kc-label"> دوره‌های فروخته (کل تاریخ)</div>
             <div className="kc-val g">{totalSold?.count}</div>
-            <div className="kc-sub">کل تاریخ </div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
           <div className="kc g">
-            <div className="kc-label"> درآمد از {topCourse?.course}</div>
-            <div className="kc-val g">{topCourse?.total_sales}</div>
-            <div className="kc-sub"> -٪ + مازاد منتور</div>
+            <div className="kc-label"> پرفروش ترین دوره (کل تاریخ)</div>
+            <div className="kc-val g" style={{ fontSize: 18 }}>
+              {topCourse?.course}
+            </div>
+            <div className="kc-sub">{topCourse?.total_sales.toLocaleString("fa-IR")} تومان</div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
           <div className="kc g">
-            <div className="kc-label"> بیشترین فروش — یک دوره</div>
-            <div className="kc-val g">{topCoursePeriod?.total_sales}</div>
-            <div className="kc-sub"> {topCoursePeriod?.course}</div>
+            <div className="kc-label">مدرس پرفروش (کل تاریخ)</div>
+            <div className="kc-val g" style={{ fontSize: 18 }}>
+              {topCoursePeriod?.teacher?.name}
+            </div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
           <div className="kc g">
             <div className="kc-label"> درآمد به ازای هر مدرس</div>
-            <div className="kc-val g">{revenuePerTeacher?.revenue_per_teacher}</div>
-            <div className="kc-sub"> میانگین ماهانه</div>
+            <div className="kc-val g">{revenuePerTeacher?.revenue_per_teacher.toLocaleString("fa-IR")}</div>
+            <div className="kc-sub"> میانگین </div>
           </div>
         </Box>
       </Stack>
