@@ -1,9 +1,10 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Logo from "@/assets/logo.jpg";
+import { localDate } from "@/utils";
 
 const menuItems = [
   {
@@ -22,19 +23,15 @@ const menuItems = [
   },
   {
     section: "مالی و تیم",
-    items: [
-      { href: "/liquidity", icon: "💰", label: "نقدینگی" },
-      { href: "/team", icon: "👥", label: "تیم" },
-      { href: "/risks", icon: "⚠️", label: "ریسک‌ها" },
-    ],
+    items: [{ href: "/team", icon: "👥", label: "تیم" }],
   },
-  {
-    section: "سیستم",
-    items: [
-      { href: "/import", icon: "📂", label: "ورود داده" },
-      { href: "/apisettings", icon: "🔌", label: "تنظیمات API" },
-    ],
-  },
+  // {
+  //   section: "سیستم",
+  //   items: [
+  //     { href: "/import", icon: "📂", label: "ورود داده" },
+  //     { href: "/apisettings", icon: "🔌", label: "تنظیمات API" },
+  //   ],
+  // },
 ];
 
 const isActive = (href: string, pathname: string) => {
@@ -44,6 +41,11 @@ const isActive = (href: string, pathname: string) => {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [dynamicTime, setDynamicTime] = useState("");
+
+  setInterval(() => {
+    setDynamicTime(localDate().time);
+  }, 1000);
 
   return (
     <div className="app">
@@ -58,9 +60,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
         <div className="hd-right">
-          <div className="pill pill-warn">در حال بازیابی</div>
-          <div className="hd-time" id="clock">
-            —
+          <div className="pill pill-warn" style={{ width: "135px" }}>
+            {localDate().fullDate + "  " + dynamicTime}
           </div>
         </div>
       </header>

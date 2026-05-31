@@ -35,13 +35,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (pathname !== "/") {
-      refetch().then((response) => {
-        if (response.status === "success") {
-          if (response.data.role === 1) {
-            router.replace("/dashboard");
-          }
-        }
-      });
+      // refetch().then((response) => {
+      //   if (response.status === "success") {
+      //     if (response.data.role === 1) {
+      //       router.replace("/dashboard");
+      //     }
+      //   }
+      // });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, data]);

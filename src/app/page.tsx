@@ -33,9 +33,10 @@ export default function LoginPages() {
   const handleSubmit = (e: any) => {
     if (otpSent) {
       e.preventDefault();
+      router.replace("/dashboard");
       postLogin(formData).then((res) => {
         if (res) {
-          router.replace("/dashboard");
+          // router.replace("/dashboard");
         }
       });
     } else {
