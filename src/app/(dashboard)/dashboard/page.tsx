@@ -1,15 +1,17 @@
 "use client";
 import Card from "@/components/card";
 import { axiosInstance } from "@/utils/axios";
-import { Stack } from "@mui/material";
+import { Backdrop, CircularProgress, Stack } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { localDate } from "@/utils";
+import { useEffect, useState } from "react";
 
 export default function OverviewPage() {
   const start = localDate().monthAgo;
   const end = localDate().fullDate;
+  const [loading, setLoading] = useState(false);
 
-  const { data: tekaneshIncome } = useQuery({
+  const { data: tekaneshIncome, isLoading: l1 } = useQuery({
     queryKey: ["get-rev-teacher"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/revenue-report/?action=revenue_per_teacher`);
@@ -18,7 +20,7 @@ export default function OverviewPage() {
     staleTime: 60000,
   });
   //
-  const { data: reports } = useQuery({
+  const { data: reports, isLoading: l2 } = useQuery({
     queryKey: ["get-bestsaleofmonth"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/reports/?action=best_sale_in_month_in_last_year`);
@@ -33,13 +35,13 @@ export default function OverviewPage() {
     );
     return data;
   };
-  const { data: dashboardData } = useQuery({
+  const { data: dashboardData, isLoading: l3 } = useQuery({
     queryKey: ["get-income-state"],
     queryFn: fetchIncome,
     staleTime: 60000,
   });
 
-  const { data: totalSold } = useQuery({
+  const { data: totalSold, isLoading: l4 } = useQuery({
     queryKey: ["get-total-sold"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/total-course-sold/?action=total_courses_sold`);
@@ -47,6 +49,12 @@ export default function OverviewPage() {
     },
     staleTime: 60000,
   });
+
+  useEffect(() => {
+    if (l1 == false && l2 == false && l3 == false && l4 == false) {
+      setLoading(false);
+    } else setLoading(true);
+  }, [l1, l2, l3, l4]);
 
   return (
     <div className="page active">
@@ -166,6 +174,10 @@ export default function OverviewPage() {
           </div> */}
         </Card>
       </Stack>
+
+      <Backdrop open={loading}>
+        <CircularProgress color="primary" size={64} thickness={4} />
+      </Backdrop>
     </div>
   );
 }

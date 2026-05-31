@@ -1,25 +1,34 @@
 "use client";
 import Card from "@/components/card";
 import { axiosInstance } from "@/utils/axios";
-import { Box, Button, Stack, TextField } from "@mui/material";
+import { Backdrop, Box, Button, CircularProgress, Stack, TextField } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Page() {
   const [start, setStart] = useState<null | string>("");
   const [end, setEnd] = useState<null | string>("");
+  const [loading, setLoading] = useState(false);
+  const [btnLoading, setBtnLoading] = useState(false);
+  const [hint, setHint] = useState("");
 
   const handleResetDate = () => {
     setStart("");
     setEnd("");
     getTopCourseRefetch();
   };
-  const handleFilter = () => {
-    getTopCourseRefetch();
+  const handleFilter = async () => {
+    if (!end || !start) {
+      setHint("بازه را مشخص کنید");
+      return;
+    }
+    setBtnLoading(true);
+    await getTopCourseRefetch();
+    setBtnLoading(false);
   };
 
   //
-  const { data: bestSaleOfMonth } = useQuery({
+  const { data: bestSaleOfMonth, isLoading: l1 } = useQuery({
     queryKey: ["get-bestsaleofmonth"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/reports/?action=best_sale_in_month_in_last_year`);
@@ -28,7 +37,7 @@ export default function Page() {
     staleTime: 60000,
   });
   //
-  const { data: activeStudents } = useQuery({
+  const { data: activeStudents, isLoading: l2 } = useQuery({
     queryKey: ["get-active-stu"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/student-reports/?action=active_students`);
@@ -37,7 +46,7 @@ export default function Page() {
     staleTime: 60000,
   });
   //
-  const { data: newStudents } = useQuery({
+  const { data: newStudents, isLoading: l3 } = useQuery({
     queryKey: ["get-new-stu"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/student-reports/?action=new_students`);
@@ -46,7 +55,7 @@ export default function Page() {
     staleTime: 60000,
   });
   //
-  const { data: topCourse } = useQuery({
+  const { data: topCourse, isLoading: l4 } = useQuery({
     queryKey: ["get-top-course"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/top-seller/?action=top_selling_course_by_teacher`);
@@ -55,7 +64,11 @@ export default function Page() {
     staleTime: 60000,
   });
   //
-  const { data: topCoursePeriod, refetch: getTopCourseRefetch } = useQuery({
+  const {
+    data: topCoursePeriod,
+    refetch: getTopCourseRefetch,
+    isLoading: l5,
+  } = useQuery({
     queryKey: ["get-top-course-period"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(
@@ -66,7 +79,7 @@ export default function Page() {
     staleTime: 60000,
   });
   //
-  const { data: totalSold } = useQuery({
+  const { data: totalSold, isLoading: l6 } = useQuery({
     queryKey: ["get-total-sold"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/total-course-sold/?action=total_courses_sold`);
@@ -75,7 +88,7 @@ export default function Page() {
     staleTime: 60000,
   });
   //
-  const { data: revenuePerTeacher } = useQuery({
+  const { data: revenuePerTeacher, isLoading: l7 } = useQuery({
     queryKey: ["get-rev-teacher"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/revenue-report/?action=revenue_per_teacher`);
@@ -84,7 +97,7 @@ export default function Page() {
     staleTime: 60000,
   });
   //
-  const { data: completedStudents } = useQuery({
+  const { data: completedStudents, isLoading: l8 } = useQuery({
     queryKey: ["get-completed-stu"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/student-reports/?action=completed_students_count`);
@@ -93,7 +106,7 @@ export default function Page() {
     staleTime: 60000,
   });
   //
-  const { data: courses } = useQuery({
+  const { data: courses, isLoading: l9 } = useQuery({
     queryKey: ["get-courses-list"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/course-list/?action=courses_report`);
@@ -102,7 +115,7 @@ export default function Page() {
     staleTime: 60000,
   });
   //
-  const { data: teachers } = useQuery({
+  const { data: teachers, isLoading: l10 } = useQuery({
     queryKey: ["get-teachers"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/teacher-list/?action=teachers_report`);
@@ -110,6 +123,23 @@ export default function Page() {
     },
     staleTime: 60000,
   });
+
+  useEffect(() => {
+    if (
+      l1 == false &&
+      l2 == false &&
+      l3 == false &&
+      l4 == false &&
+      l5 == false &&
+      l6 == false &&
+      l7 == false &&
+      l8 == false &&
+      l9 == false &&
+      l10 == false
+    ) {
+      setLoading(false);
+    } else setLoading(true);
+  }, [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10]);
 
   return (
     <div className="page active">
@@ -134,8 +164,9 @@ export default function Page() {
           size="small"
           label="تا تاریخ"
           placeholder="مثال 1405/02/02"
+          helperText={hint}
         />
-        <Button onClick={handleFilter} variant="contained" sx={{ height: 40 }}>
+        <Button loading={btnLoading} onClick={handleFilter} variant="contained" sx={{ height: 40 }}>
           اعمال فیلتر
         </Button>
 
@@ -317,6 +348,9 @@ export default function Page() {
           </Box>
         </Card>
       </Stack>
+      <Backdrop open={loading}>
+        <CircularProgress color="primary" size={64} thickness={4} />
+      </Backdrop>
     </div>
   );
 }

@@ -1,12 +1,13 @@
 "use client";
 import Card from "@/components/card";
 import { axiosInstance } from "@/utils/axios";
-import { Box, Button, CircularProgress, Stack, TextField } from "@mui/material";
+import { Backdrop, Box, Button, CircularProgress, Stack, TextField } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Page() {
   const [loading, setLoading] = useState(false);
+  const [btnLoad, setBtnLoad] = useState(false);
   const [start, setStart] = useState<null | string>("1405-01-01");
   const [end, setEnd] = useState<null | string>("1406-01-01");
 
@@ -17,23 +18,27 @@ export default function Page() {
     fetchIncomeRefetch();
     fetchIncomeRefetch();
   };
-  const handleFilter = () => {
-    fetchPlatRefetch();
-    fetchIncomeRefetch();
-    fetchIncomeRefetch();
+  const handleFilter = async () => {
+    setBtnLoad(true);
+    await fetchPlatRefetch();
+    await fetchIncomeRefetch();
+    await fetchIncomeRefetch();
+    setBtnLoad(false);
   };
 
   const fetchPlat = async () => {
-    setLoading(true);
     const { data } = await axiosInstance.get(
       `https://api.grouplancing.com/crm/api/platform-earned-stats/?start_date=${start}&end_date=${end}`,
     );
-    setLoading(false);
     return data;
   };
 
   //
-  const { data: pricesDataTable, refetch: fetchPlatRefetch } = useQuery({
+  const {
+    data: pricesDataTable,
+    refetch: fetchPlatRefetch,
+    isLoading: l1,
+  } = useQuery({
     queryKey: ["get-platforms"], // unique cache key
     queryFn: fetchPlat, // the async function
     staleTime: 60000,
@@ -47,11 +52,20 @@ export default function Page() {
   };
 
   //
-  const { data: dashboardData, refetch: fetchIncomeRefetch } = useQuery({
+  const {
+    data: dashboardData,
+    refetch: fetchIncomeRefetch,
+    isLoading: l2,
+  } = useQuery({
     queryKey: ["get-income-states"],
     queryFn: fetchIncome,
     staleTime: 60000,
   });
+
+  useEffect(() => {
+    if (l1 == false && l2 == false) setLoading(false);
+    else setLoading(true);
+  }, [l1, l2]);
 
   return (
     <div className="page active">
@@ -76,7 +90,7 @@ export default function Page() {
           label="تا تاریخ"
           placeholder="مثال 1405-02-02"
         />
-        <Button onClick={handleFilter} variant="contained" sx={{ height: 40 }}>
+        <Button loading={btnLoad} onClick={handleFilter} variant="contained" sx={{ height: 40 }}>
           اعمال فیلتر
         </Button>
 
@@ -179,11 +193,6 @@ export default function Page() {
 
         <Card title="توزیع درآمد بین پلتفرم ها">
           <div className="cb">
-            {loading && (
-              <Box textAlign={"center"}>
-                <CircularProgress color="primary" />
-              </Box>
-            )}
             {pricesDataTable?.platforms.map(
               (data: { platform_uuid: string; platform_name: string; percentage: string; amount: string }) => (
                 <div className="cmp" key={data.platform_uuid}>
@@ -204,6 +213,10 @@ export default function Page() {
       <Box>
         <Card title={`پیشرفت به هدف`}></Card>
       </Box>
+
+      <Backdrop open={loading}>
+        <CircularProgress color="primary" size={64} thickness={4} />
+      </Backdrop>
     </div>
   );
 }

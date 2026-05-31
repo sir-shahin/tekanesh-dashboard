@@ -5,40 +5,77 @@ import { Stack } from "@mui/material";
 import * as XLSX from "xlsx";
 
 // ------------------------------------------------------------
-// Types
+// Types based on the new Excel template
 // ------------------------------------------------------------
-type Gender = "مرد" | "زن" | "";
-type Role = string;
-type Level = string;
-type Business = "گروپلنسینگ" | "تکانش" | "هر دو" | "";
-type Team = string;
-type Contract = string;
-type Location = string;
-type Salary = number | string;
-type Performance = string;
-type Project = string;
-type RiskLevel = "بالا" | "متوسط" | "پایین" | "";
+type Gender = "آقا" | "خانم" | "";
+type MainBusiness = "گروپلنسینگ" | "تکانش" | "";
+type Seniority = "جونیور" | "میدلول" | "سنیور" | "لید" | "مدیر" | "";
+type RiskLevel = "پایین" | "متوسط" | "بالا" | "";
 type Status = "فعال" | "مرخصی" | "هشدار" | "";
 
+// Interface matching the exact Persian column names from the new Excel file
 interface TeamMember {
   نام: string;
+  "نام خانوادگی": string;
   جنسیت: Gender;
-  نقش: Role;
-  سطح: Level;
-  کسب‌وکار: Business;
-  تیم: Team;
-  قرارداد: Contract;
-  محل: Location;
-  "حقوق (م)": Salary;
-  عملکرد: Performance;
-  پروژه: Project;
+  "بخش اصلی": MainBusiness;
+  "بخش دوم (اگه مشترک)": string;
+  "نقش / عنوان شغلی": string;
+  "سطح ارشدیت": Seniority;
+  "نوع قرارداد": string;
+  "حضوری یا دورکار": string;
+  شهر: string;
+  "مدیر مستقیم": string;
+  "تاریخ استخدام": string;
+  "حقوق ماهانه (میلیون)": number | string;
+  "آخرین افزایش حقوق": string;
+  "درصد افزایش حقوق سالانه": number | string;
+  "امتیاز عملکرد (۱-۱۰)": number | string;
+  "تعداد پروژه فعال": number | string;
+  "ساعت کاری ماهانه": number | string;
+  "مهارت‌های کلیدی": string;
+  "دوره تکانش تکمیل شده": number | string;
   "ریسک ترک": RiskLevel;
+  "نرخ غیبت ماهانه (٪)": number | string;
   وضعیت: Status;
-  مهارت‌ها: string;
+  یادداشت: string;
 }
 
 // Raw data from Excel before mapping
 type RawRow = Record<string, string | number | null | undefined>;
+
+// List of columns to display in the table (for horizontal scrolling)
+const DISPLAY_COLUMNS: (keyof TeamMember)[] = [
+  "نام",
+  "نام خانوادگی",
+  "جنسیت",
+  "بخش اصلی",
+  "بخش دوم (اگه مشترک)",
+  "نقش / عنوان شغلی",
+  "سطح ارشدیت",
+  "نوع قرارداد",
+  "حضوری یا دورکار",
+  "شهر",
+  "مدیر مستقیم",
+  "حقوق ماهانه (میلیون)",
+  "امتیاز عملکرد (۱-۱۰)",
+  "تعداد پروژه فعال",
+  "مهارت‌های کلیدی",
+  "ریسک ترک",
+  "نرخ غیبت ماهانه (٪)",
+  "وضعیت",
+  "یادداشت",
+];
+
+// Minimum required columns for validation
+const REQUIRED_COLUMNS: (keyof TeamMember)[] = [
+  "نام",
+  "نام خانوادگی",
+  "بخش اصلی",
+  "نقش / عنوان شغلی",
+  "وضعیت",
+  "ریسک ترک",
+];
 
 // ------------------------------------------------------------
 // Helpers for encoding repair (mojibake)
@@ -73,9 +110,10 @@ function repairStrings<T>(data: T): T {
 }
 
 // ------------------------------------------------------------
-// LocalStorage key
+// LocalStorage key and version management
 // ------------------------------------------------------------
 const STORAGE_KEY = "teamData";
+const STORAGE_VERSION = "v2"; // Bump version to avoid old schema conflict
 
 // ------------------------------------------------------------
 // Main component
@@ -83,19 +121,33 @@ const STORAGE_KEY = "teamData";
 export default function TeamPage() {
   const [teamData, setTeamData] = useState<TeamMember[]>([]);
   const [isClient, setIsClient] = useState(false);
-  const [filterBiz, setFilterBiz] = useState<Business | "">("");
+  const [filterBiz, setFilterBiz] = useState<MainBusiness | "">("");
   const [filterStatus, setFilterStatus] = useState<Status | "">("");
   const [filterRisk, setFilterRisk] = useState<RiskLevel | "">("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load from localStorage after mount (client only)
+  // Load from localStorage after mount (client only) with schema validation
   useEffect(() => {
     setIsClient(true);
+    const savedVersion = localStorage.getItem(`${STORAGE_KEY}_version`);
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
+
+    if (saved && savedVersion === STORAGE_VERSION) {
       try {
         const parsed = JSON.parse(saved) as TeamMember[];
-        if (Array.isArray(parsed)) setTeamData(parsed);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Quick validation: check if first item has 'بخش اصلی' (new schema) instead of 'کسب‌وکار' (old)
+          if (parsed[0] && "بخش اصلی" in parsed[0]) {
+            setTeamData(parsed);
+          } else {
+            // Old schema detected, clear storage
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(`${STORAGE_KEY}_version`);
+            console.warn("Old data schema removed. Please upload a new Excel file.");
+          }
+        } else if (Array.isArray(parsed)) {
+          setTeamData(parsed);
+        }
       } catch (err) {
         console.error("Failed to load team data from localStorage", err);
       }
@@ -104,8 +156,12 @@ export default function TeamPage() {
 
   // Save to localStorage whenever data changes (client only)
   useEffect(() => {
-    if (isClient) {
+    if (isClient && teamData.length > 0) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(teamData));
+      localStorage.setItem(`${STORAGE_KEY}_version`, STORAGE_VERSION);
+    } else if (isClient && teamData.length === 0) {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(`${STORAGE_KEY}_version`);
     }
   }, [teamData, isClient]);
 
@@ -124,7 +180,6 @@ export default function TeamPage() {
         let workbook: XLSX.WorkBook;
         if (isCSV) {
           const text = e.target?.result as string;
-          // Repair potential mojibake in the whole CSV content
           const repairedText = fixMojibake(text);
           workbook = XLSX.read(repairedText, { type: "string" });
         } else {
@@ -132,6 +187,7 @@ export default function TeamPage() {
           workbook = XLSX.read(data, { type: "array" });
         }
 
+        // Use first sheet (typically 'team')
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const rawData: RawRow[] = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
@@ -146,47 +202,49 @@ export default function TeamPage() {
         const firstRow = repairedData[0];
         const actualHeaders = Object.keys(firstRow);
 
-        const expectedHeaders = [
-          "نام",
-          "جنسیت",
-          "نقش",
-          "سطح",
-          "کسب‌وکار",
-          "تیم",
-          "قرارداد",
-          "محل",
-          "حقوق (م)",
-          "عملکرد",
-          "پروژه",
-          "ریسک ترک",
-          "وضعیت",
-          "مهارت‌ها",
-        ];
-
-        const missingHeaders = expectedHeaders.filter((h) => !actualHeaders.includes(h));
+        // Check for required columns
+        const missingHeaders = REQUIRED_COLUMNS.filter((h) => !actualHeaders.includes(h));
         if (missingHeaders.length) {
           alert(
-            `سرستون‌های زیر در فایل پیدا نشد:\n${missingHeaders.join(", ")}\n` +
-              "لطفاً از ستون‌های دقیق با املای فارسی استفاده کنید.",
+            `ستون‌های ضروری زیر در فایل پیدا نشد:\n${missingHeaders.join(
+              ", ",
+            )}\n\nلطفاً از الگوی صحیح اکسل استفاده کنید.`,
           );
           return;
         }
 
+        // Map raw data to TeamMember type (fill missing optional fields with empty string)
         const mappedData: TeamMember[] = repairedData.map((row: RawRow) => ({
           نام: String(row["نام"] ?? ""),
-          جنسیت: String(row["جنسیت"] ?? "") as Gender,
-          نقش: String(row["نقش"] ?? ""),
-          سطح: String(row["سطح"] ?? ""),
-          کسب‌وکار: String(row["کسب‌وکار"] ?? "") as Business,
-          تیم: String(row["تیم"] ?? ""),
-          قرارداد: String(row["قرارداد"] ?? ""),
-          محل: String(row["محل"] ?? ""),
-          "حقوق (م)": row["حقوق (م)"] ?? "",
-          عملکرد: String(row["عملکرد"] ?? ""),
-          پروژه: String(row["پروژه"] ?? ""),
-          "ریسک ترک": String(row["ریسک ترک"] ?? "") as RiskLevel,
-          وضعیت: String(row["وضعیت"] ?? "") as Status,
-          مهارت‌ها: String(row["مهارت‌ها"] ?? ""),
+          "نام خانوادگی": String(row["نام خانوادگی"] ?? ""),
+          جنسیت: (row["جنسیت"] === "آقا" || row["جنسیت"] === "خانم" ? row["جنسیت"] : "") as Gender,
+          "بخش اصلی": (row["بخش اصلی"] === "گروپلنسینگ" || row["بخش اصلی"] === "تکانش"
+            ? row["بخش اصلی"]
+            : "") as MainBusiness,
+          "بخش دوم (اگه مشترک)": String(row["بخش دوم (اگه مشترک)"] ?? ""),
+          "نقش / عنوان شغلی": String(row["نقش / عنوان شغلی"] ?? ""),
+          "سطح ارشدیت": (["جونیور", "میدلول", "سنیور", "لید", "مدیر"].includes(String(row["سطح ارشدیت"]))
+            ? String(row["سطح ارشدیت"])
+            : "") as Seniority,
+          "نوع قرارداد": String(row["نوع قرارداد"] ?? ""),
+          "حضوری یا دورکار": String(row["حضوری یا دورکار"] ?? ""),
+          شهر: String(row["شهر"] ?? ""),
+          "مدیر مستقیم": String(row["مدیر مستقیم"] ?? ""),
+          "تاریخ استخدام": String(row["تاریخ استخدام"] ?? ""),
+          "حقوق ماهانه (میلیون)": row["حقوق ماهانه (میلیون)"] ?? "",
+          "آخرین افزایش حقوق": String(row["آخرین افزایش حقوق"] ?? ""),
+          "درصد افزایش حقوق سالانه": row["درصد افزایش حقوق سالانه"] ?? "",
+          "امتیاز عملکرد (۱-۱۰)": row["امتیاز عملکرد (۱-۱۰)"] ?? "",
+          "تعداد پروژه فعال": row["تعداد پروژه فعال"] ?? "",
+          "ساعت کاری ماهانه": row["ساعت کاری ماهانه"] ?? "",
+          "مهارت‌های کلیدی": String(row["مهارت‌های کلیدی"] ?? ""),
+          "دوره تکانش تکمیل شده": row["دوره تکانش تکمیل شده"] ?? "",
+          "ریسک ترک": (["پایین", "متوسط", "بالا"].includes(String(row["ریسک ترک"]))
+            ? String(row["ریسک ترک"])
+            : "") as RiskLevel,
+          "نرخ غیبت ماهانه (٪)": row["نرخ غیبت ماهانه (٪)"] ?? "",
+          وضعیت: (["فعال", "مرخصی", "هشدار"].includes(String(row["وضعیت"])) ? String(row["وضعیت"]) : "") as Status,
+          یادداشت: String(row["یادداشت"] ?? ""),
         }));
 
         setTeamData(mappedData);
@@ -212,6 +270,7 @@ export default function TeamPage() {
     if (confirm("آیا از پاک کردن تمام داده‌های تیم اطمینان دارید؟")) {
       setTeamData([]);
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(`${STORAGE_KEY}_version`);
     }
   };
 
@@ -219,11 +278,19 @@ export default function TeamPage() {
   // Filtered data
   // ------------------------------------------------------------
   const filteredData = teamData.filter((member) => {
-    if (filterBiz && member.کسب‌وکار !== filterBiz) return false;
-    if (filterStatus && member.وضعیت !== filterStatus) return false;
+    if (filterBiz && member["بخش اصلی"] !== filterBiz) return false;
+    if (filterStatus && member["وضعیت"] !== filterStatus) return false;
     if (filterRisk && member["ریسک ترک"] !== filterRisk) return false;
     return true;
   });
+
+  // ------------------------------------------------------------
+  // Helper to render cell value (handle numbers and empty strings)
+  // ------------------------------------------------------------
+  const renderCellValue = (value: unknown): string => {
+    if (value === undefined || value === null || value === "") return "—";
+    return String(value);
+  };
 
   // ------------------------------------------------------------
   // Table renderer
@@ -232,7 +299,7 @@ export default function TeamPage() {
     if (teamData.length === 0) {
       return (
         <tr>
-          <td colSpan={14} className="etd">
+          <td colSpan={DISPLAY_COLUMNS.length} className="etd">
             اکسل تیم را آپلود کنید
           </td>
         </tr>
@@ -241,7 +308,7 @@ export default function TeamPage() {
     if (filteredData.length === 0) {
       return (
         <tr>
-          <td colSpan={14} className="etd">
+          <td colSpan={DISPLAY_COLUMNS.length} className="etd">
             داده‌ای با فیلترهای انتخاب شده یافت نشد
           </td>
         </tr>
@@ -249,20 +316,9 @@ export default function TeamPage() {
     }
     return filteredData.map((member, idx) => (
       <tr key={idx}>
-        <td>{member.نام}</td>
-        <td>{member.جنسیت}</td>
-        <td>{member.نقش}</td>
-        <td>{member.سطح}</td>
-        <td>{member.کسب‌وکار}</td>
-        <td>{member.تیم}</td>
-        <td>{member.قرارداد}</td>
-        <td>{member.محل}</td>
-        <td>{member["حقوق (م)"]}</td>
-        <td>{member.عملکرد}</td>
-        <td>{member.پروژه}</td>
-        <td>{member["ریسک ترک"]}</td>
-        <td>{member.وضعیت}</td>
-        <td>{member.مهارت‌ها}</td>
+        {DISPLAY_COLUMNS.map((col) => (
+          <td key={col}>{renderCellValue(member[col])}</td>
+        ))}
       </tr>
     ));
   };
@@ -308,7 +364,7 @@ export default function TeamPage() {
             <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
               <select
                 value={filterBiz}
-                onChange={(e) => setFilterBiz(e.target.value as Business | "")}
+                onChange={(e) => setFilterBiz(e.target.value as MainBusiness | "")}
                 style={{
                   background: "var(--s2)",
                   border: "1px solid var(--b1)",
@@ -322,7 +378,6 @@ export default function TeamPage() {
                 <option value="">همه بخش‌ها</option>
                 <option value="گروپلنسینگ">گروپلنسینگ</option>
                 <option value="تکانش">تکانش</option>
-                <option value="هر دو">مشترک</option>
               </select>
               <select
                 value={filterStatus}
@@ -356,30 +411,20 @@ export default function TeamPage() {
                 }}
               >
                 <option value="">همه ریسک‌ها</option>
-                <option value="بالا">ریسک بالا</option>
-                <option value="متوسط">ریسک متوسط</option>
                 <option value="پایین">ریسک پایین</option>
+                <option value="متوسط">ریسک متوسط</option>
+                <option value="بالا">ریسک بالا</option>
               </select>
             </div>
           </div>
-          <div style={{ overflowX: "auto" }}>
-            <table className="tbl" id="team-full-table">
+          {/* Horizontal scroll container */}
+          <div style={{ overflowX: "auto", width: "100%" }}>
+            <table className="tbl" id="team-full-table" style={{ minWidth: "100%" }}>
               <thead>
                 <tr>
-                  <th>نام</th>
-                  <th>جنسیت</th>
-                  <th>نقش</th>
-                  <th>سطح</th>
-                  <th>کسب‌وکار</th>
-                  <th>تیم</th>
-                  <th>قرارداد</th>
-                  <th>محل</th>
-                  <th>حقوق (م)</th>
-                  <th>عملکرد</th>
-                  <th>پروژه</th>
-                  <th>ریسک ترک</th>
-                  <th>وضعیت</th>
-                  <th>مهارت‌ها</th>
+                  {DISPLAY_COLUMNS.map((col) => (
+                    <th key={col}>{col}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>{renderTableBody()}</tbody>
