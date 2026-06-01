@@ -308,6 +308,7 @@ header {
     transform 0.15s;
   cursor: default;
   width: 100%;
+  min-height: 105px;
 }
 .kc:hover {
   border-color: var(--b2);

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -43,9 +43,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const [dynamicTime, setDynamicTime] = useState("");
 
-  setInterval(() => {
-    setDynamicTime(localDate().time);
-  }, 1000);
+  useEffect(() => {
+    // Function to update time
+    const updateTime = () => {
+      setDynamicTime(localDate().time);
+    };
+
+    // Set interval only once after mount
+    const intervalId = setInterval(updateTime, 1000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <div className="app">

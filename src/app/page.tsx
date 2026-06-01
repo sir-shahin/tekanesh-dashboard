@@ -6,6 +6,10 @@ import { axiosInstance } from "@/utils/axios";
 import Logo from "@/assets/logo.jpg";
 import Image from "next/image";
 
+type Props = {
+  identity: string;
+  otp: string;
+};
 export default function LoginPages() {
   const router = useRouter();
 
@@ -15,25 +19,36 @@ export default function LoginPages() {
   });
   const [otpSent, setOtpSent] = useState(false);
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const postLogin = async (data: any) => {
+  const postLogin = async (data: Props) => {
     const response = await axiosInstance.post("https://etekanesh.com/account/login/", data);
     return response;
   };
 
-  const postOtp = async (data: any) => {
+  const postOtp = async (data: Props) => {
     const response = await axiosInstance.post("https://etekanesh.com/account/api/otp/send/", data);
     return response;
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     if (otpSent) {
       e.preventDefault();
-      router.replace("/dashboard");
+      if (typeof window === "undefined") {
+        postLogin(formData).then((res) => {
+          if (res) {
+            router.replace("/dashboard");
+          }
+          return;
+        });
+      } else {
+        // This code runs only in the browser
+        router.replace("/dashboard");
+      }
+
       postLogin(formData).then((res) => {
         if (res) {
           // router.replace("/dashboard");

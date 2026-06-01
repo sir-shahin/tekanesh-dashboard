@@ -8,7 +8,7 @@ declare module "axios" {
 }
 
 export const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "",
+  baseURL: "https://etekanesh.com/api/boshri",
   timeout: 20000,
   timeoutErrorMessage: "Request timed out. Please check your internet connection and try again.",
   headers: {

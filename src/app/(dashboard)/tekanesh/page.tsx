@@ -1,9 +1,15 @@
 "use client";
 import Card from "@/components/card";
 import { axiosInstance } from "@/utils/axios";
-import { Backdrop, Box, Button, CircularProgress, Stack, TextField } from "@mui/material";
+import { Backdrop, Box, Button, CircularProgress, Stack, Tab, Tabs, TextField } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  value: number;
+  index: number;
+}
 
 export default function Page() {
   const [start, setStart] = useState<null | string>("");
@@ -11,6 +17,11 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [btnLoading, setBtnLoading] = useState(false);
   const [hint, setHint] = useState("");
+  const [value, setValue] = useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
 
   const handleResetDate = () => {
     setStart("");
@@ -150,34 +161,64 @@ export default function Page() {
         </div>
       </div>
 
-      <Stack direction={"row"} mb={3} gap={2}>
-        <TextField
-          value={start}
-          onChange={(e) => setStart(e.target.value)}
-          size="small"
-          label="از تاریخ"
-          placeholder="مثال 1405/02/02"
-        />
-        <TextField
-          value={end}
-          onChange={(e) => setEnd(e.target.value)}
-          size="small"
-          label="تا تاریخ"
-          placeholder="مثال 1405/02/02"
-          helperText={hint}
-        />
-        <Button loading={btnLoading} onClick={handleFilter} variant="contained" sx={{ height: 40 }}>
-          اعمال فیلتر
-        </Button>
+      <Box borderRadius={3} bgcolor={"#080d14"} py={3} mb={3} px={2} minHeight={"0 !important"}>
+        <Stack direction={"row"} columnGap={2} alignItems={"center"} maxWidth={1400}>
+          <TextField
+            value={start}
+            onChange={(e) => setStart(e.target.value)}
+            size="small"
+            label="از تاریخ"
+            placeholder="مثال 1405/02/02"
+            fullWidth
+            InputLabelProps={{
+              sx: {
+                right: 10,
+                left: "auto",
+                transformOrigin: "top right",
+              },
+            }}
+            inputProps={{
+              style: { textAlign: "right" },
+            }}
+            margin="dense"
+            variant="standard"
+          />
+          <TextField
+            value={end}
+            onChange={(e) => setEnd(e.target.value)}
+            size="small"
+            fullWidth
+            margin="dense"
+            label="تا تاریخ"
+            placeholder="مثال 1405/02/02"
+            InputLabelProps={{
+              sx: {
+                right: 10,
+                left: "auto",
+                transformOrigin: "top right",
+              },
+            }}
+            inputProps={{
+              style: { textAlign: "right" },
+            }}
+            variant="standard"
+          />
+          <Button fullWidth loading={btnLoading} onClick={handleFilter} variant="contained">
+            اعمال فیلتر
+          </Button>
 
-        <Button onClick={handleResetDate}>حذف تاریخ</Button>
-      </Stack>
+          <Button sx={{ minWidth: 100 }} onClick={handleResetDate}>
+            حذف تاریخ
+          </Button>
+        </Stack>
+        <p style={{ fontSize: 10, color: "red", textAlign: "center" }}>{hint}</p>
+      </Box>
 
       <Stack direction={"row"} gap={2} mb={3}>
         <Box className="kg" flex={1}>
-          <div className="kc g">
-            <div className="kc-label">فروش کل (کل تاریخ)</div>
-            <div className="kc-val g">{revenuePerTeacher?.total_revenue.toLocaleString("fa-IR")}</div>
+          <div className="kc r">
+            <div className="kc-label">فروش کل</div>
+            <div className="kc-val r">{revenuePerTeacher?.total_revenue.toLocaleString("fa-IR")}</div>
             <div className="kc-sub">پرداخت شده</div>
           </div>
         </Box>
@@ -189,46 +230,45 @@ export default function Page() {
           </div>
         </Box>
         <Box className="kg" flex={1}>
-          <div className="kc g">
-            <div className="kc-label">دانشجوی فعال کل تاریخ</div>
-            <div className="kc-val g">{activeStudents?.count}</div>
+          <div className="kc b">
+            <div className="kc-label">دانشجوی فعال </div>
+            <div className="kc-val b">{activeStudents?.count}</div>
             {/* <div className="kc-sub"> ↓ از ۳۸۰ اوج</div> */}
           </div>
         </Box>
         <Box className="kg" flex={1}>
-          <div className="kc g">
-            <div className="kc-label">دانشجوی جدید (کل تاریخ)</div>
-            <div className="kc-val g">{newStudents?.count}</div>
+          <div className="kc p">
+            <div className="kc-label">دانشجوی جدید </div>
+            <div className="kc-val p">{newStudents?.count}</div>
           </div>
         </Box>
       </Stack>
 
       <Stack direction={"row"} gap="2" mb={3}>
         <Box className="kg" flex={1}>
-          <div className="kc g">
-            <div className="kc-label"> نرخ ریزش دانشجو</div>
-            <div className="kc-val g">-</div>
-            <div className="kc-sub">بالاتر از حد مجاز</div>
+          <div className="kc r">
+            <div className="kc-label">درآمد دلاری تکانش</div>
+            <div className="kc-val r">-</div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
-          <div className="kc g">
+          <div className="kc y">
             <div className="kc-label">دانشجو فارق التحصیل (کل)</div>
-            <div className="kc-val g">{completedStudents?.count}</div>
+            <div className="kc-val y">{completedStudents?.count}</div>
             <div className="kc-sub"> هدف: -٪</div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
-          <div className="kc g">
+          <div className="kc r">
             <div className="kc-label"> مدرس فعال</div>
-            <div className="kc-val g">{revenuePerTeacher?.teachers_count}</div>
+            <div className="kc-val r">{revenuePerTeacher?.teachers_count}</div>
             <div className="kc-sub"> تعداد کل</div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
-          <div className="kc g">
+          <div className="kc y">
             <div className="kc-label">میانگین رضایت</div>
-            <div className="kc-val g">-</div>
+            <div className="kc-val y">-</div>
             <div className="kc-sub"> از نظرسنجی دانشجویان</div>
           </div>
         </Box>
@@ -236,14 +276,14 @@ export default function Page() {
 
       <Stack direction={"row"} gap={2} mb={3}>
         <Box className="kg" flex={1}>
-          <div className="kc g">
-            <div className="kc-label"> دوره‌های فروخته (کل تاریخ)</div>
-            <div className="kc-val g">{totalSold?.count}</div>
+          <div className="kc b">
+            <div className="kc-label"> دوره‌های فروخته </div>
+            <div className="kc-val b">{totalSold?.count}</div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
           <div className="kc g">
-            <div className="kc-label"> پرفروش ترین دوره (کل تاریخ)</div>
+            <div className="kc-label"> پرفروش ترین دوره </div>
             <div className="kc-val g" style={{ fontSize: 18 }}>
               {topCourse?.course}
             </div>
@@ -251,24 +291,30 @@ export default function Page() {
           </div>
         </Box>
         <Box className="kg" flex={1}>
-          <div className="kc g">
-            <div className="kc-label">مدرس پرفروش (کل تاریخ)</div>
-            <div className="kc-val g" style={{ fontSize: 18 }}>
+          <div className="kc y">
+            <div className="kc-label">مدرس پرفروش </div>
+            <div className="kc-val y" style={{ fontSize: 18 }}>
               {topCoursePeriod?.teacher?.name}
             </div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
-          <div className="kc g">
+          <div className="kc p">
             <div className="kc-label"> درآمد به ازای هر مدرس</div>
-            <div className="kc-val g">{revenuePerTeacher?.revenue_per_teacher.toLocaleString("fa-IR")}</div>
+            <div className="kc-val p">{revenuePerTeacher?.revenue_per_teacher.toLocaleString("fa-IR")}</div>
             <div className="kc-sub"> میانگین </div>
           </div>
         </Box>
       </Stack>
 
-      <Stack direction={"row"} gap={2}>
-        <Card title="دوره‌ها — عملکرد جزئی">
+      <Box sx={{ width: "100%" }}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs value={value} onChange={handleChange}>
+            <Tab label="دوره‌ها | عملکرد جزئی" />
+            <Tab label="مدرس‌ها و منتورها" />
+          </Tabs>
+        </Box>
+        <TabPanel value={value} index={0}>
           <Box sx={{ overflowX: "auto" }}>
             <table className="tbl" style={{ minWidth: 300 }}>
               <thead>
@@ -309,8 +355,8 @@ export default function Page() {
               </tbody>
             </table>
           </Box>
-        </Card>
-        <Card title="مدرس‌ها و منتورها">
+        </TabPanel>
+        <TabPanel value={value} index={1}>
           <Box sx={{ overflowX: "auto" }}>
             <table className="tbl" style={{ minWidth: 300 }}>
               <thead>
@@ -346,11 +392,20 @@ export default function Page() {
               </tbody>
             </table>
           </Box>
-        </Card>
-      </Stack>
+        </TabPanel>
+      </Box>
+
       <Backdrop open={loading}>
         <CircularProgress color="primary" size={64} thickness={4} />
       </Backdrop>
+    </div>
+  );
+}
+
+function TabPanel({ children, value, index }: TabPanelProps) {
+  return (
+    <div role="tabpanel" hidden={value !== index}>
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }

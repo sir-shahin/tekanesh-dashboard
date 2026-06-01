@@ -75,27 +75,58 @@ export default function Page() {
           <div className="ph-sub">پروژه‌های نرم‌افزاری</div>
         </div>
       </div>
-      <Stack direction={"row"} mb={4} gap={2}>
-        <TextField
-          value={start}
-          onChange={(e) => setStart(e.target.value)}
-          size="small"
-          label="از تاریخ"
-          placeholder="مثال 1405-02-02"
-        />
-        <TextField
-          value={end}
-          onChange={(e) => setEnd(e.target.value)}
-          size="small"
-          label="تا تاریخ"
-          placeholder="مثال 1405-02-02"
-        />
-        <Button loading={btnLoad} onClick={handleFilter} variant="contained" sx={{ height: 40 }}>
-          اعمال فیلتر
-        </Button>
 
-        <Button onClick={handleResetDate}>ریست تاریخ</Button>
-      </Stack>
+      <Box borderRadius={3} bgcolor={"#080d14"} py={3} mb={3} px={2} minHeight={"0 !important"}>
+        <Stack direction={"row"} alignItems={"center"} maxWidth={1400} columnGap={2}>
+          <TextField
+            value={start}
+            onChange={(e) => setStart(e.target.value)}
+            size="small"
+            label="از تاریخ"
+            placeholder="مثال 1405-02-02"
+            fullWidth
+            InputLabelProps={{
+              sx: {
+                right: 10,
+                left: "auto",
+                transformOrigin: "top right",
+              },
+            }}
+            inputProps={{
+              style: { textAlign: "right" },
+            }}
+            margin="dense"
+            variant="standard"
+          />
+          <TextField
+            value={end}
+            onChange={(e) => setEnd(e.target.value)}
+            size="small"
+            label="تا تاریخ"
+            placeholder="مثال 1405-02-02"
+            fullWidth
+            InputLabelProps={{
+              sx: {
+                right: 10,
+                left: "auto",
+                transformOrigin: "top right",
+              },
+            }}
+            inputProps={{
+              style: { textAlign: "right" },
+            }}
+            margin="dense"
+            variant="standard"
+          />
+          <Button fullWidth loading={btnLoad} onClick={handleFilter} variant="contained">
+            اعمال فیلتر
+          </Button>
+
+          <Button sx={{ minWidth: 100 }} onClick={handleResetDate}>
+            ریست تاریخ
+          </Button>
+        </Stack>
+      </Box>
 
       <Stack direction={"row"} gap={2}>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
@@ -123,7 +154,6 @@ export default function Page() {
           <div className="kc g">
             <div className="kc-label">مشارکت‌کنندگان</div>
             <div className="kc-val g">{dashboardData?.income_participants} نفر</div>
-            <div className="kc-sub">در این تاریخ</div>
           </div>
         </div>
       </Stack>
@@ -132,14 +162,12 @@ export default function Page() {
           <div className="kc g">
             <div className="kc-label">تعداد درآمد اولی ها</div>
             <div className="kc-val g">{dashboardData?.new_income_starters}</div>
-            <div className="kc-sub">در این تاریخ</div>
           </div>
         </div>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc g">
             <div className="kc-label">پروژه‌های از دست رفته</div>
             <div className="kc-val g">{dashboardData?.monthly_loss}</div>
-            <div className="kc-sub">در این تاریخ</div>
           </div>
         </div>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
