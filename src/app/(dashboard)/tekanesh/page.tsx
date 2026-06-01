@@ -35,6 +35,11 @@ export default function Page() {
     }
     setBtnLoading(true);
     await getTopCourseRefetch();
+    await newStudentsRefetch();
+    await revenuePerTeacherRefetch();
+    await topCourseRefetch();
+    await topTecherRefetch();
+    await totalSalesRefetch();
     setBtnLoading(false);
   };
 
@@ -43,6 +48,19 @@ export default function Page() {
     queryKey: ["get-bestsaleofmonth"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/reports/?action=best_sale_in_month_in_last_year`);
+      return data.data;
+    },
+    staleTime: 60000,
+  });
+  //
+  const {
+    data: totalSales,
+    isLoading: l0,
+    refetch: totalSalesRefetch,
+  } = useQuery({
+    queryKey: ["get-total-sales"],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get(`/reports/?action=total_sales&start=${start}&end=${end}`);
       return data.data;
     },
     staleTime: 60000,
@@ -57,24 +75,50 @@ export default function Page() {
     staleTime: 60000,
   });
   //
-  const { data: newStudents, isLoading: l3 } = useQuery({
+  const {
+    data: newStudents,
+    isLoading: l3,
+    refetch: newStudentsRefetch,
+  } = useQuery({
     queryKey: ["get-new-stu"],
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`/student-reports/?action=new_students`);
+      const { data } = await axiosInstance.get(`/student-reports/?action=new_students&start=${start}&end=${end}`);
       return data.data;
     },
     staleTime: 60000,
   });
   //
-  const { data: topCourse, isLoading: l4 } = useQuery({
+  const {
+    data: topCourse,
+    isLoading: l4,
+    refetch: topCourseRefetch,
+  } = useQuery({
     queryKey: ["get-top-course"],
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`/top-seller/?action=top_selling_course_by_teacher`);
+      const { data } = await axiosInstance.get(
+        `/top-seller/?action=top_selling_course_by_revenue&start=${start}&end=${end}`,
+      );
       return data.data;
     },
     staleTime: 60000,
   });
   //
+
+  const {
+    data: topTecher,
+    isLoading: l11,
+    refetch: topTecherRefetch,
+  } = useQuery({
+    queryKey: ["get-top-teacher"],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get(
+        `/top-seller/?action=top_selling_course_by_count&start=${start}&end=${end}`,
+      );
+      return data.data;
+    },
+    staleTime: 60000,
+  });
+
   const {
     data: topCoursePeriod,
     refetch: getTopCourseRefetch,
@@ -83,7 +127,7 @@ export default function Page() {
     queryKey: ["get-top-course-period"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(
-        `/top-seller/?action=top_selling_course_by_teacher&start=${start}&end=${end}`,
+        `/top-seller/?action=top_selling_course_by_revenue&start=${start}&end=${end}`,
       );
       return data.data;
     },
@@ -99,10 +143,14 @@ export default function Page() {
     staleTime: 60000,
   });
   //
-  const { data: revenuePerTeacher, isLoading: l7 } = useQuery({
+  const {
+    data: revenuePerTeacher,
+    isLoading: l7,
+    refetch: revenuePerTeacherRefetch,
+  } = useQuery({
     queryKey: ["get-rev-teacher"],
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`/revenue-report/?action=revenue_per_teacher`);
+      const { data } = await axiosInstance.get(`/revenue-report/?action=revenue_per_teacher&start=${start}&end=${end}`);
       return data.data;
     },
     staleTime: 60000,
@@ -218,7 +266,7 @@ export default function Page() {
         <Box className="kg" flex={1}>
           <div className="kc r">
             <div className="kc-label">فروش کل</div>
-            <div className="kc-val r">{revenuePerTeacher?.total_revenue.toLocaleString("fa-IR")}</div>
+            <div className="kc-val r">{totalSales?.total.toLocaleString("fa-IR")}</div>
             <div className="kc-sub">پرداخت شده</div>
           </div>
         </Box>
@@ -285,7 +333,7 @@ export default function Page() {
           <div className="kc g">
             <div className="kc-label"> پرفروش ترین دوره </div>
             <div className="kc-val g" style={{ fontSize: 18 }}>
-              {topCourse?.course}
+              {topCourse?.course.name}
             </div>
             <div className="kc-sub">{topCourse?.total_sales.toLocaleString("fa-IR")} تومان</div>
           </div>
@@ -294,7 +342,7 @@ export default function Page() {
           <div className="kc y">
             <div className="kc-label">مدرس پرفروش </div>
             <div className="kc-val y" style={{ fontSize: 18 }}>
-              {topCoursePeriod?.teacher?.name}
+              {topTecher?.teacher.name}
             </div>
           </div>
         </Box>

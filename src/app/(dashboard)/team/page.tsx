@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import * as XLSX from "xlsx";
+import Card from "@/components/card";
 
 // ------------------------------------------------------------
 // Types based on the new Excel template
@@ -121,6 +122,10 @@ const STORAGE_VERSION = "v2"; // Bump version to avoid old schema conflict
 export default function TeamPage() {
   const [teamData, setTeamData] = useState<TeamMember[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const [sumSallary, setSumSallary] = useState(0);
+  const [sumWellDone, setSumWellDone] = useState(0);
+  const [sumAbsence, setSumAbsence] = useState(0);
+  const [sumProject, setSumProject] = useState(0);
   const [filterBiz, setFilterBiz] = useState<MainBusiness | "">("");
   const [filterStatus, setFilterStatus] = useState<Status | "">("");
   const [filterRisk, setFilterRisk] = useState<RiskLevel | "">("");
@@ -156,6 +161,15 @@ export default function TeamPage() {
 
   // Save to localStorage whenever data changes (client only)
   useEffect(() => {
+    let sum = 0;
+    let sum2 = 0;
+    let sum3 = 0;
+    let sum4 = 0;
+    setSumSallary(teamData.map((t) => (sum += Number(t["حقوق ماهانه (میلیون)"])))[teamData.length - 1]);
+    setSumWellDone(teamData.map((t) => (sum2 += Number(t["امتیاز عملکرد (۱-۱۰)"])))[teamData.length - 1]);
+    setSumAbsence(teamData.map((t) => (sum3 += Number(t["نرخ غیبت ماهانه (٪)"])))[teamData.length - 1]);
+    setSumProject(teamData.map((t) => (sum4 += Number(t["تعداد پروژه فعال"])))[teamData.length - 1]);
+
     if (isClient && teamData.length > 0) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(teamData));
       localStorage.setItem(`${STORAGE_KEY}_version`, STORAGE_VERSION);
@@ -354,6 +368,127 @@ export default function TeamPage() {
           </a>
         </div>
       </div>
+
+      <div className="ibox y">
+        اکسل نمونه رو دانلود کن، پر کن و آپلود کن — همه متریک‌ها خودکار محاسبه میشن. دقت کن ستون «کسب‌وکار» می‌تونه «هر
+        دو» باشه برای اعضای مشترک.
+      </div>
+
+      <Stack direction={"row"} gap={2}>
+        <div className="kg4" style={{ display: "flex", width: "100%" }}>
+          <div className="kc b">
+            <div className="kc-label">کل تیم</div>
+            <div className="kc-val b">{teamData.length}</div>
+            <div className="kc-sub"></div>
+          </div>
+        </div>
+        <div className="kg4" style={{ display: "flex", width: "100%" }}>
+          <div className="kc p">
+            <div className="kc-label">نسبت خانم / اقا</div>
+            <div className="kc-val p">
+              {(
+                teamData.filter((t) => t["جنسیت"] === "خانم").length /
+                teamData.filter((t) => t["جنسیت"] === "آقا").length
+              ).toFixed(2)}
+            </div>
+            <div className="kc-sub"></div>
+          </div>
+        </div>
+        <div className="kg4" style={{ display: "flex", width: "100%" }}>
+          <div className="kc y">
+            <div className="kc-label">نرخ ترک (ریسک بالا)</div>
+            <div className="kc-val y">-</div>
+            <div className="kc-sub">افراد با رسیک بالا</div>
+          </div>
+        </div>
+        <div className="kg4" style={{ display: "flex", width: "100%" }}>
+          <div className="kc g">
+            <div className="kc-label">درآمد سرانه</div>
+            <div className="kc-val g" dir="ltr" style={{ textAlign: "right" }}>
+              -
+            </div>
+            <div className="kc-sub">درامد دلاری / نفر</div>
+          </div>
+        </div>
+      </Stack>
+      <Stack direction={"row"} gap={2}>
+        <div className="kg4" style={{ display: "flex", width: "100%" }}>
+          <div className="kc b">
+            <div className="kc-label">جمع حقوق ماهانه </div>
+            <div className="kc-val b">{sumSallary}</div>
+            <div className="kc-sub">میلیون تومان</div>
+          </div>
+        </div>
+        <div className="kg4" style={{ display: "flex", width: "100%" }}>
+          <div className="kc b">
+            <div className="kc-label">میانگین حقوق</div>
+            <div className="kc-val b">{(sumSallary / teamData.length).toFixed(2)}</div>
+            <div className="kc-sub"></div>
+          </div>
+        </div>
+        <div className="kg4" style={{ display: "flex", width: "100%" }}>
+          <div className="kc g">
+            <div className="kc-label">میانگین عملکرد</div>
+            <div className="kc-val g">{(sumWellDone / teamData.length).toFixed(2)}</div>
+            <div className="kc-sub"></div>
+          </div>
+        </div>
+        <div className="kg4" style={{ display: "flex", width: "100%" }}>
+          <div className="kc r">
+            <div className="kc-label">میانگین روز غیبت</div>
+            <div className="kc-val r" dir="ltr" style={{ textAlign: "right" }}>
+              {sumAbsence / teamData.length}
+            </div>
+            <div className="kc-sub">درصد</div>
+          </div>
+        </div>
+      </Stack>
+      <Stack direction={"row"} gap={2}>
+        <div className="kg4" style={{ display: "flex", width: "100%" }}>
+          <div className="kc b">
+            <div className="kc-label">اعضای مشترک (هردو)</div>
+            <div className="kc-val b">
+              {teamData.filter((t) => t["بخش دوم (اگه مشترک)"].includes("تکانش")).length +
+                teamData.filter((t) => t["بخش دوم (اگه مشترک)"].includes("گروپلنسینگ")).length}
+            </div>
+            <div className="kc-sub">گروپلنسینگ + تلانش</div>
+          </div>
+        </div>
+        <div className="kg4" style={{ display: "flex", width: "100%" }}>
+          <div className="kc g">
+            <div className="kc-label">تمام وقت</div>
+            <div className="kc-val g">{teamData.filter((t) => t["نوع قرارداد"] === "تمام‌وقت").length}</div>
+            <div className="kc-sub"></div>
+          </div>
+        </div>
+        <div className="kg4" style={{ display: "flex", width: "100%" }}>
+          <div className="kc p">
+            <div className="kc-label">دورکار</div>
+            <div className="kc-val p">{teamData.filter((t) => t["حضوری یا دورکار"] === "دورکار").length}</div>
+            <div className="kc-sub"></div>
+          </div>
+        </div>
+        <div className="kg4" style={{ display: "flex", width: "100%" }}>
+          <div className="kc y">
+            <div className="kc-label">میانگین پروژه/نفر</div>
+            <div className="kc-val y" dir="ltr" style={{ textAlign: "right" }}>
+              {(sumProject / teamData.length).toFixed(2)}
+            </div>
+            <div className="kc-sub"></div>
+          </div>
+        </div>
+      </Stack>
+
+      <Stack direction={"row"} gap={2}>
+        <Box flex={1}>
+          <Card title="توزیع تیم بین بخش‌ها" />
+        </Box>
+        <Box flex={1}>
+          <Card title="نسبت جنسیت و سطح ارشدیت" />
+        </Box>
+      </Stack>
+
+      {/* list table */}
       <Stack>
         <div className="card">
           <div className="ch">

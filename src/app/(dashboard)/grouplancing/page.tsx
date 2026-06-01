@@ -4,16 +4,18 @@ import { axiosInstance } from "@/utils/axios";
 import { Backdrop, Box, Button, CircularProgress, Stack, TextField } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { localDate } from "@/utils";
+import moment from "moment-jalaali";
 
 export default function Page() {
   const [loading, setLoading] = useState(false);
   const [btnLoad, setBtnLoad] = useState(false);
-  const [start, setStart] = useState<null | string>("1405-01-01");
-  const [end, setEnd] = useState<null | string>("1406-01-01");
+  const [start, setStart] = useState<null | string>(localDate().monthAgo);
+  const [end, setEnd] = useState<null | string>(localDate().fullDate);
 
   const handleResetDate = () => {
-    setStart("1405-01-01");
-    setEnd("1406-01-01");
+    setStart(localDate().monthAgo);
+    setEnd(localDate().fullDate);
     fetchPlatRefetch();
     fetchIncomeRefetch();
     fetchIncomeRefetch();
@@ -28,7 +30,7 @@ export default function Page() {
 
   const fetchPlat = async () => {
     const { data } = await axiosInstance.get(
-      `https://api.grouplancing.com/crm/api/platform-earned-stats/?start_date=${start}&end_date=${end}`,
+      `https://api.grouplancing.com/crm/api/platform-earned-stats/?start_date=${moment(start, "jYYYY-jMM-jDD").format("yyyy-MM-DD")}&end_date=${moment(end, "jYYYY-jMM-jDD").format("yyyy-MM-DD")}`,
     );
     return data;
   };
@@ -137,23 +139,23 @@ export default function Page() {
           </div>
         </div>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
-          <div className="kc g">
+          <div className="kc r">
             <div className="kc-label">خالص گروپلنسینگ</div>
-            <div className="kc-val g">{dashboardData?.grouplancing_net_incone}</div>
+            <div className="kc-val r">{dashboardData?.grouplancing_net_incone}</div>
             {/* <div className="kc-sub">۱۵٪ margin</div> */}
           </div>
         </div>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
-          <div className="kc g">
+          <div className="kc y">
             <div className="kc-label">پروژه‌های فعال</div>
-            <div className="kc-val g">{dashboardData?.with_sub}</div>
+            <div className="kc-val y">{dashboardData?.with_sub}</div>
             {/* <div className="kc-sub">+۲ ماه قبل</div> */}
           </div>
         </div>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
-          <div className="kc g">
+          <div className="kc b">
             <div className="kc-label">مشارکت‌کنندگان</div>
-            <div className="kc-val g">{dashboardData?.income_participants} نفر</div>
+            <div className="kc-val b">{dashboardData?.income_participants} نفر</div>
           </div>
         </div>
       </Stack>
@@ -165,15 +167,15 @@ export default function Page() {
           </div>
         </div>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
-          <div className="kc g">
+          <div className="kc b">
             <div className="kc-label">پروژه‌های از دست رفته</div>
-            <div className="kc-val g">{dashboardData?.monthly_loss}</div>
+            <div className="kc-val b">{dashboardData?.monthly_loss}</div>
           </div>
         </div>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
-          <div className="kc g">
+          <div className="kc p">
             <div className="kc-label">میانگین درآمد هر نفر</div>
-            <div className="kc-val g">{dashboardData?.average_income_per_person}</div>
+            <div className="kc-val p">{dashboardData?.average_income_per_person}</div>
             {/* <div className="kc-sub">+۲ ماه قبل</div> */}
           </div>
         </div>
@@ -208,9 +210,9 @@ export default function Page() {
           </div>
         </div>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
-          <div className="kc g">
+          <div className="kc r">
             <div className="kc-label">هدف ماه بعد</div>
-            <div className="kc-val g">۲۰٪</div>
+            <div className="kc-val r">۲۰٪</div>
             <div className="kc-sub"> رشد هدف</div>
           </div>
         </div>

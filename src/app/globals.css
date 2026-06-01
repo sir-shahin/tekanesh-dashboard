@@ -714,3 +714,13 @@ header {
 .tbl {
   box-shadow: none;
 }
+
+.ibox.y {
+    background: var(--yd);
+    border: 1px solid var(--yb);
+    color: var(--t2);
+    font-size: 12px;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 22px;
+}

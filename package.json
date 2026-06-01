@@ -20,6 +20,7 @@
     "auto-zustand-selectors-hook": "^3.0.1",
     "axios": "^1.11.0",
     "date-fns": "^4.4.0",
+    "moment-jalaali": "^0.10.4",
     "next": "15.4.5",
     "notistack": "^3.0.2",
     "react": "19.1.0",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/moment-jalaali": "^0.7.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
