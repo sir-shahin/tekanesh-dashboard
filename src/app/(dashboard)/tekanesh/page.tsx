@@ -4,6 +4,7 @@ import { axiosInstance } from "@/utils/axios";
 import { Backdrop, Box, Button, CircularProgress, Stack, Tab, Tabs, TextField } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import moment from "moment-jalaali";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -12,8 +13,8 @@ interface TabPanelProps {
 }
 
 export default function Page() {
-  const [start, setStart] = useState<null | string>("");
-  const [end, setEnd] = useState<null | string>("");
+  const [start, setStart] = useState<null | string>(moment().startOf("jMonth").format("jYYYY/jMM/jDD"));
+  const [end, setEnd] = useState<null | string>(moment().format("jYYYY/jMM/jDD"));
   const [loading, setLoading] = useState(false);
   const [btnLoading, setBtnLoading] = useState(false);
   const [hint, setHint] = useState("");
@@ -40,6 +41,8 @@ export default function Page() {
     await topCourseRefetch();
     await topTecherRefetch();
     await totalSalesRefetch();
+    await activeProcessUsersRefetch();
+    await partnerIncomeRefetch();
     setBtnLoading(false);
   };
 
@@ -174,6 +177,38 @@ export default function Page() {
     staleTime: 60000,
   });
   //
+  const toApiDate = (date: string | null) => (date ?? "").replace(/\//g, "-");
+
+  const {
+    data: activeProcessUsers,
+    refetch: activeProcessUsersRefetch,
+    isLoading: l12,
+  } = useQuery({
+    queryKey: ["get-active-process-users"],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get(
+        `https://api.grouplancing.com/dashboard/api/dashboard/completed-process-users-count/?start_date=${toApiDate(start)}&end_date=${toApiDate(end)}`,
+      );
+      return data;
+    },
+    staleTime: 60000,
+  });
+
+  const {
+    data: partnerIncome,
+    refetch: partnerIncomeRefetch,
+    isLoading: l13,
+  } = useQuery({
+    queryKey: ["get-partner-income-tekanesh"],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get(
+        `https://api.grouplancing.com/dashboard/api/dashboard/income-stats/?start_date=${toApiDate(start)}&end_date=${toApiDate(end)}`,
+      );
+      return data;
+    },
+    staleTime: 60000,
+  });
+
   const { data: teachers, isLoading: l10 } = useQuery({
     queryKey: ["get-teachers"],
     queryFn: async () => {
@@ -194,11 +229,13 @@ export default function Page() {
       l7 == false &&
       l8 == false &&
       l9 == false &&
-      l10 == false
+      l10 == false &&
+      l12 == false &&
+      l13 == false
     ) {
       setLoading(false);
     } else setLoading(true);
-  }, [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10]);
+  }, [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l12, l13]);
 
   return (
     <div className="page active">
@@ -266,21 +303,21 @@ export default function Page() {
         <Box className="kg" flex={1}>
           <div className="kc r">
             <div className="kc-label">فروش کل</div>
-            <div className="kc-val r">{totalSales?.total.toLocaleString("fa-IR")}</div>
+            <div className="kc-val r">{totalSales?.total != null ? totalSales.total.toLocaleString("fa-IR") : "-"}</div>
             <div className="kc-sub">پرداخت شده</div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
           <div className="kc g">
             <div className="kc-label">اوج فروش (بهترین ماه سال گذشته)</div>
-            <div className="kc-val g">{bestSaleOfMonth?.total_sale.toLocaleString("fa-IR")}</div>
+            <div className="kc-val g">{bestSaleOfMonth?.total_sale != null ? bestSaleOfMonth.total_sale.toLocaleString("fa-IR") : "-"}</div>
             <div className="kc-sub">{bestSaleOfMonth?.month_name + " " + bestSaleOfMonth?.year}</div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
           <div className="kc b">
             <div className="kc-label">دانشجوی فعال </div>
-            <div className="kc-val b">{activeStudents?.count}</div>
+            <div className="kc-val b">{activeProcessUsers?.users_count ?? "-"}</div>
             {/* <div className="kc-sub"> ↓ از ۳۸۰ اوج</div> */}
           </div>
         </Box>
@@ -296,7 +333,7 @@ export default function Page() {
         <Box className="kg" flex={1}>
           <div className="kc r">
             <div className="kc-label">درآمد دلاری تکانش</div>
-            <div className="kc-val r">-</div>
+            <div className="kc-val r">{partnerIncome?.partner_gross_income ?? "-"}</div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
@@ -335,7 +372,7 @@ export default function Page() {
             <div className="kc-val g" style={{ fontSize: 18 }}>
               {topCourse?.course.name}
             </div>
-            <div className="kc-sub">{topCourse?.total_sales.toLocaleString("fa-IR")} تومان</div>
+            <div className="kc-sub">{topCourse?.total_sales != null ? topCourse.total_sales.toLocaleString("fa-IR") : "-"} تومان</div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
@@ -349,7 +386,7 @@ export default function Page() {
         <Box className="kg" flex={1}>
           <div className="kc p">
             <div className="kc-label"> درآمد به ازای هر مدرس</div>
-            <div className="kc-val p">{revenuePerTeacher?.revenue_per_teacher.toLocaleString("fa-IR")}</div>
+            <div className="kc-val p">{revenuePerTeacher?.revenue_per_teacher != null ? revenuePerTeacher.revenue_per_teacher.toLocaleString("fa-IR") : "-"}</div>
             <div className="kc-sub"> میانگین </div>
           </div>
         </Box>

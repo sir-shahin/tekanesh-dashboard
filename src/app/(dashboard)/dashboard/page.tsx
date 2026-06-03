@@ -75,7 +75,7 @@ export default function OverviewPage() {
         <div className="kc y">
           <div className="kc-icon">📈</div>
           <div className="kc-label">سود ناخالص گروپلنسینگ</div>
-          <div className="kc-val y">{dashboardData?.gross_income.toLocaleString("fa-IR")}</div>
+          <div className="kc-val y">{dashboardData?.gross_income != null ? dashboardData.gross_income.toLocaleString("fa-IR") : "-"}</div>
           <div className="kc-sub">
             <span className="tag nt">در یکماه</span>
           </div>
@@ -83,7 +83,7 @@ export default function OverviewPage() {
         <div className="kc b">
           <div className="kc-icon">🎓</div>
           <div className="kc-label">فروش تکانش</div>
-          <div className="kc-val r">{tekaneshIncome?.total_revenue.toLocaleString("fa-IR")}</div>
+          <div className="kc-val r">{tekaneshIncome?.total_revenue != null ? tekaneshIncome.total_revenue.toLocaleString("fa-IR") : "-"}</div>
           <div className="kc-sub">اوج: {reports?.total_sale?.toLocaleString("fa-IR")}</div>
         </div>
         <div className="kc">

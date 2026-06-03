@@ -4,18 +4,17 @@ import { axiosInstance } from "@/utils/axios";
 import { Backdrop, Box, Button, CircularProgress, Stack, TextField } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { localDate } from "@/utils";
 import moment from "moment-jalaali";
 
 export default function Page() {
   const [loading, setLoading] = useState(false);
   const [btnLoad, setBtnLoad] = useState(false);
-  const [start, setStart] = useState<null | string>(localDate().monthAgo);
-  const [end, setEnd] = useState<null | string>(localDate().fullDate);
+  const [start, setStart] = useState<null | string>(moment().startOf("jMonth").format("jYYYY-jMM-jDD"));
+  const [end, setEnd] = useState<null | string>(moment().format("jYYYY-jMM-jDD"));
 
   const handleResetDate = () => {
-    setStart(localDate().monthAgo);
-    setEnd(localDate().fullDate);
+    setStart(moment().startOf("jMonth").format("jYYYY-jMM-jDD"));
+    setEnd(moment().format("jYYYY-jMM-jDD"));
     fetchPlatRefetch();
     fetchIncomeRefetch();
     fetchIncomeRefetch();
@@ -64,10 +63,19 @@ export default function Page() {
     staleTime: 60000,
   });
 
+  const { data: userEarned, isLoading: l3 } = useQuery({
+    queryKey: ["get-user-earned-gpl"],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get(`https://api.grouplancing.com/crm/api/user-earned-stats/`);
+      return data;
+    },
+    staleTime: 60000,
+  });
+
   useEffect(() => {
-    if (l1 == false && l2 == false) setLoading(false);
+    if (l1 == false && l2 == false && l3 == false) setLoading(false);
     else setLoading(true);
-  }, [l1, l2]);
+  }, [l1, l2, l3]);
 
   return (
     <div className="page active">
@@ -134,7 +142,7 @@ export default function Page() {
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc g">
             <div className="kc-label">درآمد ناخالص فعلی</div>
-            <div className="kc-val g">{dashboardData?.gross_income}</div>
+            <div className="kc-val g">{dashboardData?.gpl_gross_income}</div>
             {/* <div className="kc-sub">73% از اوج</div> */}
           </div>
         </div>
@@ -198,7 +206,7 @@ export default function Page() {
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc g">
             <div className="kc-label">بیشترین وابستگی به پلتفرم</div>
-            <div className="kc-val g">{dashboardData?.most_valuable_platform}</div>
+            <div className="kc-val g">{dashboardData?.most_valuable_platform ?? "پرپلی"}</div>
             {/* <div className="kc-sub"> ریسک تمرکز بالا</div> */}
           </div>
         </div>
@@ -241,7 +249,83 @@ export default function Page() {
         </Card>
       </Stack>
       <Box>
-        <Card title={`پیشرفت به هدف`}></Card>
+        <Card title="پیشرفت به هدف">
+          <div className="cb">
+            {/* Bar chart */}
+            {(() => {
+              const months: { shamsi_month: string; sum_user_input_amount: string }[] =
+                userEarned?.last_10_months_data ?? [];
+              const maxVal = Math.max(...months.map((m) => Number(m.sum_user_input_amount)), 1);
+              return (
+                <>
+                  <div className="spark" style={{ height: 80, gap: 6 }}>
+                    {months.map((m, i) => (
+                      <div
+                        key={i}
+                        className="spark-bar"
+                        style={{
+                          height: `${(Number(m.sum_user_input_amount) / maxVal) * 100}%`,
+                          background:
+                            i === months.length - 1 ? "var(--green)" : "var(--b3)",
+                          flex: 1,
+                        }}
+                        title={`${m.shamsi_month}: $${m.sum_user_input_amount}`}
+                      />
+                    ))}
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginTop: 6,
+                      fontSize: 9,
+                      color: "var(--t3)",
+                    }}
+                  >
+                    {months.map((m, i) => (
+                      <span key={i} style={{ flex: 1, textAlign: "center" }}>
+                        {m.shamsi_month?.slice(-2)}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Progress toward peak */}
+                  <div className="pb-wrap" style={{ marginTop: 16 }}>
+                    <div className="pb-labels">
+                      <span>این ماه: ${userEarned?.last_10_months_data?.at(-1)?.sum_user_input_amount ?? 0}</span>
+                      <span>اوج: ${userEarned?.highest?.value}</span>
+                    </div>
+                    <div className="pb">
+                      <div
+                        className="pb-fill"
+                        style={{
+                          width: `${userEarned?.highest?.value > 0 ? (Number(userEarned?.last_10_months_data?.at(-1)?.sum_user_input_amount ?? 0) / userEarned.highest.value) * 100 : 0}%`,
+                          background: "linear-gradient(90deg, var(--blue), var(--green))",
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Summary */}
+                  <div style={{ marginTop: 12 }}>
+                    <div className="ri">
+                      <div className="rl">میانگین ۶ ماه</div>
+                      <div className="rv y">${userEarned?.last_6_months_average}</div>
+                    </div>
+                    <div className="ri">
+                      <div className="rl">رشد نسبت به ماه قبل</div>
+                      <div className="rv b" dir="ltr">{userEarned?.vs_last_month?.change_percent}٪</div>
+                    </div>
+                    <div className="ri">
+                      <div className="rl">بهترین ماه ({userEarned?.highest?.shamsi_month})</div>
+                      <div className="rv g">${userEarned?.highest?.value}</div>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </Card>
       </Box>
 
       <Backdrop open={loading}>
