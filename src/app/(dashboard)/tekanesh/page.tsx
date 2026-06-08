@@ -5,6 +5,7 @@ import { Backdrop, Box, Button, CircularProgress, Stack, Tab, Tabs, TextField } 
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import moment from "moment-jalaali";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -27,7 +28,15 @@ export default function Page() {
   const handleResetDate = () => {
     setStart("");
     setEnd("");
-    getTopCourseRefetch();
+    setTimeout(() => {
+      activeProcessUsersRefetch();
+      partnerIncomeRefetch();
+      totalSalesRefetch();
+      topTecherRefetch();
+      topCourseRefetch();
+      revenuePerTeacherRefetch();
+      newStudentsRefetch();
+    }, 1000);
   };
   const handleFilter = async () => {
     if (!end || !start) {
@@ -35,7 +44,6 @@ export default function Page() {
       return;
     }
     setBtnLoading(true);
-    await getTopCourseRefetch();
     await newStudentsRefetch();
     await revenuePerTeacherRefetch();
     await topCourseRefetch();
@@ -68,15 +76,7 @@ export default function Page() {
     },
     staleTime: 60000,
   });
-  //
-  const { data: activeStudents, isLoading: l2 } = useQuery({
-    queryKey: ["get-active-stu"],
-    queryFn: async () => {
-      const { data } = await axiosInstance.get(`/student-reports/?action=active_students`);
-      return data.data;
-    },
-    staleTime: 60000,
-  });
+
   //
   const {
     data: newStudents,
@@ -116,21 +116,6 @@ export default function Page() {
     queryFn: async () => {
       const { data } = await axiosInstance.get(
         `/top-seller/?action=top_selling_course_by_count&start=${start}&end=${end}`,
-      );
-      return data.data;
-    },
-    staleTime: 60000,
-  });
-
-  const {
-    data: topCoursePeriod,
-    refetch: getTopCourseRefetch,
-    isLoading: l5,
-  } = useQuery({
-    queryKey: ["get-top-course-period"],
-    queryFn: async () => {
-      const { data } = await axiosInstance.get(
-        `/top-seller/?action=top_selling_course_by_revenue&start=${start}&end=${end}`,
       );
       return data.data;
     },
@@ -220,22 +205,22 @@ export default function Page() {
 
   useEffect(() => {
     if (
+      l0 == false &&
       l1 == false &&
-      l2 == false &&
       l3 == false &&
       l4 == false &&
-      l5 == false &&
       l6 == false &&
       l7 == false &&
       l8 == false &&
       l9 == false &&
       l10 == false &&
       l12 == false &&
+      l11 == false &&
       l13 == false
     ) {
       setLoading(false);
     } else setLoading(true);
-  }, [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l12, l13]);
+  }, [l0, l1, l3, l4, l6, l7, l8, l9, l10, l11, l12, l13]);
 
   return (
     <div className="page active">
@@ -248,46 +233,19 @@ export default function Page() {
 
       <Box borderRadius={3} bgcolor={"#080d14"} py={3} mb={3} px={2} minHeight={"0 !important"}>
         <Stack direction={"row"} columnGap={2} alignItems={"center"} maxWidth={1400}>
-          <TextField
-            value={start}
-            onChange={(e) => setStart(e.target.value)}
-            size="small"
-            label="از تاریخ"
-            placeholder="مثال 1405/02/02"
-            fullWidth
-            InputLabelProps={{
-              sx: {
-                right: 10,
-                left: "auto",
-                transformOrigin: "top right",
-              },
-            }}
-            inputProps={{
-              style: { textAlign: "right" },
-            }}
-            margin="dense"
-            variant="standard"
-          />
-          <TextField
-            value={end}
-            onChange={(e) => setEnd(e.target.value)}
-            size="small"
-            fullWidth
-            margin="dense"
+          <DatePicker
             label="تا تاریخ"
-            placeholder="مثال 1405/02/02"
-            InputLabelProps={{
-              sx: {
-                right: 10,
-                left: "auto",
-                transformOrigin: "top right",
-              },
-            }}
-            inputProps={{
-              style: { textAlign: "right" },
-            }}
-            variant="standard"
+            value={start ? moment(start, "jYYYY/jMM/jDD") : null}
+            onChange={(v) => setStart(moment(v).format("jYYYY/jMM/jDD").toString())}
+            sx={{ width: "100%", direction: "ltr" }}
           />
+          <DatePicker
+            label="تا تاریخ"
+            value={end ? moment(end, "jYYYY/jMM/jDD") : null}
+            onChange={(v) => setEnd(moment(v).format("jYYYY/jMM/jDD").toString())}
+            sx={{ width: "100%", direction: "ltr" }}
+          />
+
           <Button fullWidth loading={btnLoading} onClick={handleFilter} variant="contained">
             اعمال فیلتر
           </Button>
@@ -310,7 +268,9 @@ export default function Page() {
         <Box className="kg" flex={1}>
           <div className="kc g">
             <div className="kc-label">اوج فروش (بهترین ماه سال گذشته)</div>
-            <div className="kc-val g">{bestSaleOfMonth?.total_sale != null ? bestSaleOfMonth.total_sale.toLocaleString("fa-IR") : "-"}</div>
+            <div className="kc-val g">
+              {bestSaleOfMonth?.total_sale != null ? bestSaleOfMonth.total_sale.toLocaleString("fa-IR") : "-"}
+            </div>
             <div className="kc-sub">{bestSaleOfMonth?.month_name + " " + bestSaleOfMonth?.year}</div>
           </div>
         </Box>
@@ -329,7 +289,7 @@ export default function Page() {
         </Box>
       </Stack>
 
-      <Stack direction={"row"} gap="2" mb={3}>
+      <Stack direction={"row"} gap={2} mb={3}>
         <Box className="kg" flex={1}>
           <div className="kc r">
             <div className="kc-label">درآمد دلاری تکانش</div>
@@ -372,7 +332,9 @@ export default function Page() {
             <div className="kc-val g" style={{ fontSize: 18 }}>
               {topCourse?.course.name}
             </div>
-            <div className="kc-sub">{topCourse?.total_sales != null ? topCourse.total_sales.toLocaleString("fa-IR") : "-"} تومان</div>
+            <div className="kc-sub">
+              {topCourse?.total_sales != null ? topCourse.total_sales.toLocaleString("fa-IR") : "-"} تومان
+            </div>
           </div>
         </Box>
         <Box className="kg" flex={1}>
@@ -386,7 +348,11 @@ export default function Page() {
         <Box className="kg" flex={1}>
           <div className="kc p">
             <div className="kc-label"> درآمد به ازای هر مدرس</div>
-            <div className="kc-val p">{revenuePerTeacher?.revenue_per_teacher != null ? revenuePerTeacher.revenue_per_teacher.toLocaleString("fa-IR") : "-"}</div>
+            <div className="kc-val p">
+              {revenuePerTeacher?.revenue_per_teacher != null
+                ? revenuePerTeacher.revenue_per_teacher.toLocaleString("fa-IR")
+                : "-"}
+            </div>
             <div className="kc-sub"> میانگین </div>
           </div>
         </Box>

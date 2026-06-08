@@ -5,6 +5,7 @@ import { Backdrop, Box, Button, CircularProgress, Stack, TextField } from "@mui/
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import moment from "moment-jalaali";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 export default function Page() {
   const [loading, setLoading] = useState(false);
@@ -15,15 +16,19 @@ export default function Page() {
   const handleResetDate = () => {
     setStart(moment().startOf("jMonth").format("jYYYY-jMM-jDD"));
     setEnd(moment().format("jYYYY-jMM-jDD"));
-    fetchPlatRefetch();
-    fetchIncomeRefetch();
-    fetchIncomeRefetch();
+    setTimeout(() => {
+      fetchPlatRefetch();
+      fetchIncomeRefetch();
+      fetchIncomeRefetch();
+      activeProcessUsersRefetch();
+    }, 1000);
   };
   const handleFilter = async () => {
     setBtnLoad(true);
     await fetchPlatRefetch();
     await fetchIncomeRefetch();
     await fetchIncomeRefetch();
+    await activeProcessUsersRefetch();
     setBtnLoad(false);
   };
 
@@ -71,11 +76,26 @@ export default function Page() {
     },
     staleTime: 60000,
   });
+  const toApiDate = (date: string | null) => (date ?? "").replace(/\//g, "-");
+  const {
+    data: activeProcessUsers,
+    refetch: activeProcessUsersRefetch,
+    isLoading: l4,
+  } = useQuery({
+    queryKey: ["get-active-process-users"],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get(
+        `https://api.grouplancing.com/dashboard/api/dashboard/completed-process-users-count/?start_date=${toApiDate(start)}&end_date=${toApiDate(end)}`,
+      );
+      return data;
+    },
+    staleTime: 60000,
+  });
 
   useEffect(() => {
-    if (l1 == false && l2 == false && l3 == false) setLoading(false);
+    if (l1 == false && l2 == false && l3 == false && l4 == false) setLoading(false);
     else setLoading(true);
-  }, [l1, l2, l3]);
+  }, [l1, l2, l3, l4]);
 
   return (
     <div className="page active">
@@ -88,46 +108,19 @@ export default function Page() {
 
       <Box borderRadius={3} bgcolor={"#080d14"} py={3} mb={3} px={2} minHeight={"0 !important"}>
         <Stack direction={"row"} alignItems={"center"} maxWidth={1400} columnGap={2}>
-          <TextField
-            value={start}
-            onChange={(e) => setStart(e.target.value)}
-            size="small"
+          <DatePicker
             label="از تاریخ"
-            placeholder="مثال 1405-02-02"
-            fullWidth
-            InputLabelProps={{
-              sx: {
-                right: 10,
-                left: "auto",
-                transformOrigin: "top right",
-              },
-            }}
-            inputProps={{
-              style: { textAlign: "right" },
-            }}
-            margin="dense"
-            variant="standard"
+            value={moment(start, "jYYYY-jMM-jDD")}
+            onChange={(v) => setStart(moment(v).format("jYYYY-jMM-jDD").toString())}
+            sx={{ width: "100%", direction: "ltr" }}
           />
-          <TextField
-            value={end}
-            onChange={(e) => setEnd(e.target.value)}
-            size="small"
+          <DatePicker
             label="تا تاریخ"
-            placeholder="مثال 1405-02-02"
-            fullWidth
-            InputLabelProps={{
-              sx: {
-                right: 10,
-                left: "auto",
-                transformOrigin: "top right",
-              },
-            }}
-            inputProps={{
-              style: { textAlign: "right" },
-            }}
-            margin="dense"
-            variant="standard"
+            value={moment(end, "jYYYY-jMM-jDD")}
+            onChange={(v) => setEnd(moment(v).format("jYYYY-jMM-jDD").toString())}
+            sx={{ width: "100%", direction: "ltr" }}
           />
+
           <Button fullWidth loading={btnLoad} onClick={handleFilter} variant="contained">
             اعمال فیلتر
           </Button>
@@ -142,21 +135,21 @@ export default function Page() {
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc g">
             <div className="kc-label">درآمد ناخالص فعلی</div>
-            <div className="kc-val g">{dashboardData?.gpl_gross_income}</div>
+            <div className="kc-val g">{pricesDataTable?.total_amount.toLocaleString("fa-IR")}</div>
             {/* <div className="kc-sub">73% از اوج</div> */}
           </div>
         </div>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc r">
             <div className="kc-label">خالص گروپلنسینگ</div>
-            <div className="kc-val r">{dashboardData?.grouplancing_net_incone}</div>
+            <div className="kc-val r">{dashboardData?.gpl_gross_income.toLocaleString("fa-IR")}</div>
             {/* <div className="kc-sub">۱۵٪ margin</div> */}
           </div>
         </div>
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc y">
             <div className="kc-label">پروژه‌های فعال</div>
-            <div className="kc-val y">{dashboardData?.with_sub}</div>
+            <div className="kc-val y">{activeProcessUsers?.users_count}</div>
             {/* <div className="kc-sub">+۲ ماه قبل</div> */}
           </div>
         </div>
@@ -183,7 +176,7 @@ export default function Page() {
         <div className="kg4" style={{ display: "flex", width: "100%" }}>
           <div className="kc p">
             <div className="kc-label">میانگین درآمد هر نفر</div>
-            <div className="kc-val p">{dashboardData?.average_income_per_person}</div>
+            <div className="kc-val p">{dashboardData?.average_income_per_person.toFixed(2)}</div>
             {/* <div className="kc-sub">+۲ ماه قبل</div> */}
           </div>
         </div>
@@ -265,8 +258,7 @@ export default function Page() {
                         className="spark-bar"
                         style={{
                           height: `${(Number(m.sum_user_input_amount) / maxVal) * 100}%`,
-                          background:
-                            i === months.length - 1 ? "var(--green)" : "var(--b3)",
+                          background: i === months.length - 1 ? "var(--green)" : "var(--b3)",
                           flex: 1,
                         }}
                         title={`${m.shamsi_month}: $${m.sum_user_input_amount}`}
@@ -314,7 +306,9 @@ export default function Page() {
                     </div>
                     <div className="ri">
                       <div className="rl">رشد نسبت به ماه قبل</div>
-                      <div className="rv b" dir="ltr">{userEarned?.vs_last_month?.change_percent}٪</div>
+                      <div className="rv b" dir="ltr">
+                        {userEarned?.vs_last_month?.change_percent}٪
+                      </div>
                     </div>
                     <div className="ri">
                       <div className="rl">بهترین ماه ({userEarned?.highest?.shamsi_month})</div>
