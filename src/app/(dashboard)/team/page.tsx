@@ -484,10 +484,121 @@ export default function TeamPage() {
 
       <Stack direction={"row"} gap={2}>
         <Box flex={1}>
-          <Card title="توزیع تیم بین بخش‌ها" />
+          <Card title="توزیع تیم بین بخش‌ها">
+            <div className="cb">
+              <div className="cmp">
+                <div className="cmp-label">گروپلنسینگ</div>
+                <div className="cmp-bar-wrap">
+                  <div
+                    className="cmp-bar-fill"
+                    style={{
+                      width: `${(teamData.filter((t) => t["بخش اصلی"].includes("گروپلنسینگ")).length / 35) * 100}%`,
+                      background: "var(--green)",
+                    }}
+                  ></div>
+                </div>
+                <div className="cmp-val">
+                  {teamData.filter((t) => t["بخش اصلی"].includes("گروپلنسینگ")).length} نفر{" "}
+                </div>
+              </div>
+              <div className="cmp">
+                <div className="cmp-label">تکانش</div>
+                <div className="cmp-bar-wrap">
+                  <div
+                    className="cmp-bar-fill"
+                    style={{
+                      width: `${(teamData.filter((t) => t["بخش اصلی"].includes("تکانش")).length / 35) * 100}%`,
+                      background: "var(--green)",
+                    }}
+                  ></div>
+                </div>
+                <div className="cmp-val">{teamData.filter((t) => t["بخش اصلی"].includes("تکانش")).length} نفر </div>
+              </div>
+            </div>
+          </Card>
         </Box>
         <Box flex={1}>
-          <Card title="نسبت جنسیت و سطح ارشدیت" />
+          <Card title="نسبت جنسیت و سطح ارشدیت">
+            <div className="cb">
+              {/* Progress toward peak */}
+              <div className="pb-wrap" style={{ marginTop: 16 }}>
+                <div className="pb" style={{ height: 20, backgroundColor: "var(--purple)" }}>
+                  <div
+                    className="pb-fill"
+                    style={{
+                      width: `${(teamData.filter((t) => t["جنسیت"] === "آقا").length / (teamData.filter((t) => t["جنسیت"] === "آقا").length + teamData.filter((t) => t["جنسیت"] === "خانم").length)) * 100}%`,
+                      backgroundColor: "var(--blue)",
+                    }}
+                  />
+                </div>
+                <div className="pb-labels" style={{ marginTop: 10 }}>
+                  <span>آقا: {teamData.filter((t) => t["جنسیت"] === "آقا").length}</span>
+                  <span>خانم: {teamData.filter((t) => t["جنسیت"] === "خانم").length}</span>
+                </div>
+              </div>
+
+              <div className="cmp">
+                <div className="cmp-label">سنیور</div>
+                <div className="cmp-bar-wrap">
+                  <div
+                    className="cmp-bar-fill"
+                    style={{
+                      width: `${(teamData.filter((t) => t["سطح ارشدیت"].includes("سنیور")).length / 35) * 100}%`,
+                      background: "var(--yellow)",
+                    }}
+                  ></div>
+                </div>
+                <div className="cmp-val">
+                  {((teamData.filter((t) => t["سطح ارشدیت"].includes("سنیور")).length / 35) * 100).toFixed(2)}%
+                </div>
+              </div>
+              <div className="cmp">
+                <div className="cmp-label">میدلول</div>
+                <div className="cmp-bar-wrap">
+                  <div
+                    className="cmp-bar-fill"
+                    style={{
+                      width: `${(teamData.filter((t) => t["سطح ارشدیت"].includes("میدلول")).length / 35) * 100}%`,
+                      background: "var(--yellow)",
+                    }}
+                  ></div>
+                </div>
+                <div className="cmp-val">
+                  {((teamData.filter((t) => t["سطح ارشدیت"].includes("میدلول")).length / 35) * 100).toFixed(2)}%
+                </div>
+              </div>
+              <div className="cmp">
+                <div className="cmp-label">جونیور</div>
+                <div className="cmp-bar-wrap">
+                  <div
+                    className="cmp-bar-fill"
+                    style={{
+                      width: `${(teamData.filter((t) => t["سطح ارشدیت"].includes("جونیور")).length / 35) * 100}%`,
+                      background: "var(--yellow)",
+                    }}
+                  ></div>
+                </div>
+                <div className="cmp-val">
+                  {((teamData.filter((t) => t["سطح ارشدیت"].includes("جونیور")).length / 35) * 100).toFixed(2)}%
+                </div>
+              </div>
+              <div className="cmp">
+                <div className="cmp-label">لید</div>
+                <div className="cmp-bar-wrap">
+                  <div
+                    className="cmp-bar-fill"
+                    style={{
+                      width: `${(teamData.filter((t) => t["سطح ارشدیت"].includes("لید")).length / 35) * 100}%`,
+                      background: "var(--yellow)",
+                    }}
+                  ></div>
+                </div>
+                <div className="cmp-val">
+                  {((teamData.filter((t) => t["سطح ارشدیت"].includes("لید")).length / 35) * 100).toFixed(2)}%
+                </div>
+              </div>
+            </div>
+          </Card>
         </Box>
       </Stack>
 

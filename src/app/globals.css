@@ -492,7 +492,7 @@ header {
   display: flex;
   justify-content: space-between;
   font-size: 9px;
-  color: var(--t3);
+  color: var(--t2);
   margin-bottom: 5px;
 }
 .pb {
