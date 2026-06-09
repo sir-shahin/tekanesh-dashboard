@@ -5,10 +5,11 @@ import { Backdrop, CircularProgress, Stack } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { localDate } from "@/utils";
 import { useEffect, useState } from "react";
+import moment from "moment-jalaali";
 
 export default function OverviewPage() {
-  const start = localDate().monthAgo;
-  const end = localDate().fullDate;
+  const [start] = useState<null | string>(moment().startOf("jMonth").format("jYYYY-jMM-jDD"));
+  const [end] = useState<null | string>(moment().format("jYYYY-jMM-jDD"));
   const [loading, setLoading] = useState(false);
 
   const { data: tekaneshIncome, isLoading: l1 } = useQuery({
@@ -49,12 +50,29 @@ export default function OverviewPage() {
     },
     staleTime: 60000,
   });
+  const fetchPlat = async () => {
+    const { data } = await axiosInstance.get(
+      `https://api.grouplancing.com/crm/api/platform-earned-stats/?start_date=${moment(start, "jYYYY-jMM-jDD").format("yyyy-MM-DD")}&end_date=${moment(end, "jYYYY-jMM-jDD").format("yyyy-MM-DD")}`,
+    );
+    return data;
+  };
+
+  //
+  const {
+    data: pricesDataTable,
+    refetch: fetchPlatRefetch,
+    isLoading: l0,
+  } = useQuery({
+    queryKey: ["get-platforms"], // unique cache key
+    queryFn: fetchPlat, // the async function
+    staleTime: 60000,
+  });
 
   useEffect(() => {
-    if (l1 == false && l2 == false && l3 == false && l4 == false) {
+    if (l0 == false && l1 == false && l2 == false && l3 == false && l4 == false) {
       setLoading(false);
     } else setLoading(true);
-  }, [l1, l2, l3, l4]);
+  }, [l0, l1, l2, l3, l4]);
 
   return (
     <div className="page active">
@@ -68,14 +86,14 @@ export default function OverviewPage() {
       <div className="kg4">
         <div className="kc g">
           <div className="kc-icon">💵</div>
-          <div className="kc-label">درآمد دلاری ماهانه</div>
-          <div className="kc-val g">-</div>
+          <div className="kc-label">درآمد ناخالص فعلی</div>
+          <div className="kc-val g">{pricesDataTable?.total_amount.toLocaleString("fa-IR")}</div>
           <div className="kc-sub">{/* <span className="tag dn">↓ ۷۳٪ از اوج</span> اوج: $150K */}</div>
         </div>
         <div className="kc y">
           <div className="kc-icon">📈</div>
-          <div className="kc-label">سود ناخالص گروپلنسینگ</div>
-          <div className="kc-val y">{dashboardData?.gross_income != null ? dashboardData.gross_income.toLocaleString("fa-IR") : "-"}</div>
+          <div className="kc-label">خالص گروپلنسینگ</div>
+          <div className="kc-val r">{dashboardData?.gpl_gross_income.toLocaleString("fa-IR")}</div>
           <div className="kc-sub">
             <span className="tag nt">در یکماه</span>
           </div>
@@ -83,7 +101,9 @@ export default function OverviewPage() {
         <div className="kc b">
           <div className="kc-icon">🎓</div>
           <div className="kc-label">فروش تکانش</div>
-          <div className="kc-val r">{tekaneshIncome?.total_revenue != null ? tekaneshIncome.total_revenue.toLocaleString("fa-IR") : "-"}</div>
+          <div className="kc-val r">
+            {tekaneshIncome?.total_revenue != null ? tekaneshIncome.total_revenue.toLocaleString("fa-IR") : "-"}
+          </div>
           <div className="kc-sub">اوج: {reports?.total_sale?.toLocaleString("fa-IR")}</div>
         </div>
         <div className="kc">
