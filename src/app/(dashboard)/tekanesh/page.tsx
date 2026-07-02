@@ -234,7 +234,7 @@ export default function Page() {
       <Box borderRadius={3} bgcolor={"#080d14"} py={3} mb={3} px={2} minHeight={"0 !important"}>
         <Stack direction={"row"} columnGap={2} alignItems={"center"} maxWidth={1400}>
           <DatePicker
-            label="تا تاریخ"
+            label="از تاریخ"
             value={start ? moment(start, "jYYYY/jMM/jDD") : null}
             onChange={(v) => setStart(moment(v).format("jYYYY/jMM/jDD").toString())}
             sx={{ width: "100%", direction: "ltr" }}
