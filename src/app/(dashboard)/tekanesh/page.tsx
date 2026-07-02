@@ -339,7 +339,7 @@ export default function Page() {
         </Box>
         <Box className="kg" flex={1}>
           <div className="kc y">
-            <div className="kc-label">مدرس پرفروش </div>
+            <div className="kc-label">بیشترین جذب یک مدرس</div>
             <div className="kc-val y" style={{ fontSize: 18 }}>
               {topTecher?.teacher.name}
             </div>
