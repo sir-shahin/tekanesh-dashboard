@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -43,18 +43,20 @@ const menuItems = [
   // },
 ];
 
-const isActive = (href: string, pathname: string) => {
-  if (href === "/") return pathname === "/";
-
-  return pathname.startsWith(href);
-};
-
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [dynamicTime, setDynamicTime] = useState("");
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     "/tekanesh": pathname.startsWith("/tekanesh"),
   });
+
+  const isActive = useCallback(
+    (href: string) => {
+      if (href === "/") return pathname === "/";
+      return pathname === href || pathname == `${href}/`;
+    },
+    [pathname],
+  );
 
   useEffect(() => {
     // Function to update time
@@ -106,7 +108,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {section.items.map((item, i) => {
                 const hasChildren = Boolean(item.children?.length);
                 const isOpen = hasChildren && openMenus[item.href];
-                const itemActive = isActive(item.href, pathname);
+                const itemActive = isActive(item.href);
 
                 return (
                   <div key={item.label + i}>
@@ -142,7 +144,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       <div className="nav-sublist">
                         {item.children!.map((subItem) => (
                           <Link key={subItem.href} href={subItem.href} style={{ textDecoration: "none" }}>
-                            <div className={`nav-subitem ${isActive(subItem.href, pathname) ? "active" : ""}`}>
+                            <div className={`nav-subitem ${isActive(subItem.href) ? "active" : ""}`}>
                               {subItem.label}
                             </div>
                           </Link>
