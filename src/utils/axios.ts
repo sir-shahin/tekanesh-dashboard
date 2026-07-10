@@ -1,6 +1,8 @@
 import axios from "axios";
 import type { z } from "zod";
 
+import { authStore, getStoredAccessToken } from "@/stores/auth-store";
+
 declare module "axios" {
   export interface AxiosRequestConfig {
     schema?: z.ZodType;
@@ -17,3 +19,34 @@ export const axiosInstance = axios.create({
     "Accept-Language": "en",
   },
 });
+
+axiosInstance.interceptors.request.use((config) => {
+  const isLoginRequest = config.url?.includes("/login/");
+
+  if (!isLoginRequest) {
+    const token = getStoredAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+
+  return config;
+});
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+    const isLoginRequest = error.config?.url?.includes("/login/");
+
+    if (status === 401 && status === 403 && !isLoginRequest) {
+      authStore.getState().clearAuth();
+
+      if (typeof window !== "undefined" && window.location.pathname !== "/") {
+        window.location.href = "/";
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);
