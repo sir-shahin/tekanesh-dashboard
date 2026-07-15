@@ -1,6 +1,6 @@
 "use client";
 import Card from "@/components/card";
-import { axiosInstance } from "@/utils/axios";
+import { axiosInstance, grouplancingAxiosInstance } from "@/utils/axios";
 import { Backdrop, Box, Button, CircularProgress, Stack, Tab, Tabs, TextField } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -171,8 +171,8 @@ export default function Page() {
   } = useQuery({
     queryKey: ["get-active-process-users"],
     queryFn: async () => {
-      const { data } = await axiosInstance.get(
-        `https://api.grouplancing.com/dashboard/api/dashboard/completed-process-users-count/?start_date=${toApiDate(start)}&end_date=${toApiDate(end)}`,
+      const { data } = await grouplancingAxiosInstance.get(
+        `/dashboard/api/dashboard/completed-process-users-count/?start_date=${toApiDate(start)}&end_date=${toApiDate(end)}`,
       );
       return data;
     },
@@ -186,8 +186,8 @@ export default function Page() {
   } = useQuery({
     queryKey: ["get-partner-income-tekanesh"],
     queryFn: async () => {
-      const { data } = await axiosInstance.get(
-        `https://api.grouplancing.com/dashboard/api/dashboard/income-stats/?start_date=${toApiDate(start)}&end_date=${toApiDate(end)}`,
+      const { data } = await grouplancingAxiosInstance.get(
+        `/dashboard/api/dashboard/income-stats/?start_date=${toApiDate(start)}&end_date=${toApiDate(end)}`,
       );
       return data;
     },

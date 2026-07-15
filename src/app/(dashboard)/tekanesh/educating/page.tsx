@@ -25,7 +25,7 @@ export default function MarketingPage() {
   } = useQuery({
     queryKey: ["get-teacher-reports"],
     queryFn: async () => {
-      let selectedTeachers = search.map((uuid) => `&teacher=${uuid}`).join("");
+      const selectedTeachers = search.map((uuid) => `&teacher=${uuid}`).join("");
       const { data } = await axiosInstance.get(
         `https://etekanesh.com/api/boshri/reports/teacher-summary/?${selectedTeachers}&from_date=${start}&to_date=${end}`,
       );

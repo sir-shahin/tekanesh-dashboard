@@ -1,6 +1,6 @@
 "use client";
 import Card from "@/components/card";
-import { axiosInstance } from "@/utils/axios";
+import { grouplancingAxiosInstance } from "@/utils/axios";
 import { Box, CircularProgress, Stack } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -12,7 +12,7 @@ export default function Page() {
     queryKey: ["get-user-earned"],
     queryFn: async () => {
       setLoading(true);
-      const { data } = await axiosInstance.get(`https://api.grouplancing.com/crm/api/user-earned-stats/`);
+      const { data } = await grouplancingAxiosInstance.get(`/crm/api/user-earned-stats/`);
       setLoading(false);
       return data;
     },

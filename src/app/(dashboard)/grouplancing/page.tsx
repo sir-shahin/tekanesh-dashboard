@@ -1,6 +1,6 @@
 "use client";
 import Card from "@/components/card";
-import { axiosInstance } from "@/utils/axios";
+import { grouplancingAxiosInstance } from "@/utils/axios";
 import { Backdrop, Box, Button, CircularProgress, Stack, TextField } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -33,8 +33,8 @@ export default function Page() {
   };
 
   const fetchPlat = async () => {
-    const { data } = await axiosInstance.get(
-      `https://api.grouplancing.com/crm/api/platform-earned-stats/?start_date=${moment(start, "jYYYY-jMM-jDD").format("yyyy-MM-DD")}&end_date=${moment(end, "jYYYY-jMM-jDD").format("yyyy-MM-DD")}`,
+    const { data } = await grouplancingAxiosInstance.get(
+      `/crm/api/platform-earned-stats/?start_date=${moment(start, "jYYYY-jMM-jDD").format("yyyy-MM-DD")}&end_date=${moment(end, "jYYYY-jMM-jDD").format("yyyy-MM-DD")}`,
     );
     return data;
   };
@@ -51,8 +51,8 @@ export default function Page() {
   });
 
   const fetchIncome = async () => {
-    const { data } = await axiosInstance.get(
-      `https://api.grouplancing.com/dashboard/api/dashboard/income-stats/?start_date=${start}&end_date=${end}`,
+    const { data } = await grouplancingAxiosInstance.get(
+      `/dashboard/api/dashboard/income-stats/?start_date=${start}&end_date=${end}`,
     );
     return data;
   };
@@ -71,7 +71,7 @@ export default function Page() {
   const { data: userEarned, isLoading: l3 } = useQuery({
     queryKey: ["get-user-earned-gpl"],
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`https://api.grouplancing.com/crm/api/user-earned-stats/`);
+      const { data } = await grouplancingAxiosInstance.get(`/crm/api/user-earned-stats/`);
       return data;
     },
     staleTime: 60000,
@@ -84,8 +84,8 @@ export default function Page() {
   } = useQuery({
     queryKey: ["get-active-process-users"],
     queryFn: async () => {
-      const { data } = await axiosInstance.get(
-        `https://api.grouplancing.com/dashboard/api/dashboard/completed-process-users-count/?start_date=${toApiDate(start)}&end_date=${toApiDate(end)}`,
+      const { data } = await grouplancingAxiosInstance.get(
+        `/dashboard/api/dashboard/completed-process-users-count/?start_date=${toApiDate(start)}&end_date=${toApiDate(end)}`,
       );
       return data;
     },

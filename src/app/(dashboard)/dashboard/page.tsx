@@ -1,6 +1,6 @@
 "use client";
 import Card from "@/components/card";
-import { axiosInstance } from "@/utils/axios";
+import { axiosInstance, grouplancingAxiosInstance } from "@/utils/axios";
 import { Backdrop, CircularProgress, Stack } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { localDate } from "@/utils";
@@ -31,8 +31,8 @@ export default function OverviewPage() {
   });
   //
   const fetchIncome = async () => {
-    const { data } = await axiosInstance.get(
-      `https://api.grouplancing.com/dashboard/api/dashboard/income-stats?start_date=${start}&end_date=${end}`,
+    const { data } = await grouplancingAxiosInstance.get(
+      `/dashboard/api/dashboard/income-stats?start_date=${start}&end_date=${end}`,
     );
     return data;
   };
@@ -51,8 +51,8 @@ export default function OverviewPage() {
     staleTime: 60000,
   });
   const fetchPlat = async () => {
-    const { data } = await axiosInstance.get(
-      `https://api.grouplancing.com/crm/api/platform-earned-stats/?start_date=${moment(start, "jYYYY-jMM-jDD").format("yyyy-MM-DD")}&end_date=${moment(end, "jYYYY-jMM-jDD").format("yyyy-MM-DD")}`,
+    const { data } = await grouplancingAxiosInstance.get(
+      `/crm/api/platform-earned-stats/?start_date=${moment(start, "jYYYY-jMM-jDD").format("yyyy-MM-DD")}&end_date=${moment(end, "jYYYY-jMM-jDD").format("yyyy-MM-DD")}`,
     );
     return data;
   };

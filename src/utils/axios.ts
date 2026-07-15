@@ -50,3 +50,16 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+// GroupLancing's API does not use auth and rejects requests carrying the
+// etekanesh Authorization header, so it needs its own instance without
+// axiosInstance's request/response interceptors.
+export const grouplancingAxiosInstance = axios.create({
+  baseURL: "https://api.grouplancing.com",
+  timeout: 20000,
+  timeoutErrorMessage: "Request timed out. Please check your internet connection and try again.",
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+});
